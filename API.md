@@ -1,0 +1,461 @@
+# MÓOU Public API Reference
+
+**Version:** `1.0.0`  
+**Base URL:** `https://usemoou.xyz/api/v1`  
+**Interactive docs:** [usemoou.xyz/docs](https://usemoou.xyz/docs)  
+**Health check:** [usemoou.xyz/api/v1/health](https://usemoou.xyz/api/v1/health)
+
+MÓOU (谋) exposes a public REST API that compiles plain-English trading ideas into structured strategy specifications with multi-dimensional risk scoring. The API merges the internal compile and score pipelines into a single request — suitable for agents, dashboards, and trading infrastructure integrations.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Authentication](#authentication)
+- [Rate Limits](#rate-limits)
+- [CORS](#cors)
+- [Error Handling](#error-handling)
+- [Endpoints](#endpoints)
+  - [GET /health](#get-health)
+  - [GET /markets](#get-markets)
+  - [GET /stats](#get-stats)
+  - [POST /compile](#post-compile)
+- [Response Schemas](#response-schemas)
+- [Examples](#examples)
+- [Operational Notes](#operational-notes)
+- [Disclaimer](#disclaimer)
+
+---
+
+## Overview
+
+| Property | Value |
+|----------|-------|
+| Protocol | HTTPS |
+| Format | JSON |
+| API version | `1.0.0` |
+| AI model | `qwen3.6-plus` (Alibaba Cloud, via Bitget hackathon proxy) |
+| Upstream | `https://hackathon.bitgetops.com/v1` |
+| Powered by | MÓOU 谋 · [usemoou.xyz](https://usemoou.xyz) |
+
+All timestamps are ISO 8601 UTC strings. All successful `/compile` responses include a `meta` object with processing metadata.
+
+---
+
+## Authentication
+
+No API key is required during the Bitget AI Base Camp hackathon period.
+
+Requests are identified by client IP for rate limiting. No `Authorization` header is needed.
+
+> **Post-hackathon:** Authentication and rate limits may change. Monitor `/health` and this document for updates.
+
+---
+
+## Rate Limits
+
+| Limit | Value |
+|-------|-------|
+| Requests per IP | **10** |
+| Window | **1 hour** (rolling) |
+| Applies to | `POST /compile` |
+
+When exceeded, the API returns **HTTP 429** with error code `RATE_LIMIT_EXCEEDED`.
+
+`GET` endpoints (`/health`, `/markets`, `/stats`) are not rate-limited.
+
+---
+
+## CORS
+
+Cross-origin requests are supported on `POST /compile`.
+
+| Header | Value |
+|--------|-------|
+| `Access-Control-Allow-Origin` | `*` |
+| `Access-Control-Allow-Methods` | `POST, OPTIONS` |
+| `Access-Control-Allow-Headers` | `Content-Type` |
+
+Preflight `OPTIONS` requests to `/compile` return **HTTP 200** with the headers above.
+
+---
+
+## Error Handling
+
+All API errors use a consistent envelope:
+
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable description",
+    "docs": "https://usemoou.xyz/docs"
+  }
+}
+```
+
+### Error codes
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `MISSING_FIELDS` | 400 | One or more required fields are missing or the request body is invalid JSON |
+| `INVALID_MARKET` | 400 | `market` is not a supported value |
+| `RATE_LIMIT_EXCEEDED` | 429 | More than 10 compile requests from this IP within the past hour |
+| `COMPILATION_FAILED` | 500 | AI model failed to compile or score the strategy |
+
+---
+
+## Endpoints
+
+### GET /health
+
+Liveness and version probe. Use for uptime monitoring and service discovery.
+
+**Request**
+
+```http
+GET /api/v1/health HTTP/1.1
+Host: usemoou.xyz
+```
+
+**Response** `200 OK`
+
+```json
+{
+  "status": "operational",
+  "model": "qwen3.6-plus",
+  "endpoint": "https://hackathon.bitgetops.com/v1",
+  "version": "1.0.0",
+  "timestamp": "2026-06-13T11:32:55.000Z",
+  "powered_by": "MÓOU 谋 · usemoou.xyz"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | Service status (`operational`) |
+| `model` | string | AI model identifier |
+| `endpoint` | string | Upstream Qwen proxy base URL |
+| `version` | string | API version |
+| `timestamp` | string | Server time (ISO 8601) |
+| `powered_by` | string | Attribution string |
+
+---
+
+### GET /markets
+
+Returns supported markets, timeframes, and market regimes. Use to populate UI selectors or validate inputs before calling `/compile`.
+
+**Request**
+
+```http
+GET /api/v1/markets HTTP/1.1
+Host: usemoou.xyz
+```
+
+**Response** `200 OK`
+
+```json
+{
+  "markets": [
+    { "id": "crypto_futures", "label": "Crypto Futures", "exchange": "Bitget" },
+    { "id": "crypto_spot", "label": "Crypto Spot", "exchange": "Bitget" },
+    { "id": "us_stocks", "label": "US Stocks (Tokenized)", "exchange": "Bitget" }
+  ],
+  "timeframes": [
+    { "id": "scalp", "label": "Scalp", "range": "1–15m" },
+    { "id": "swing", "label": "Swing", "range": "1H–4H" },
+    { "id": "position", "label": "Position", "range": "Daily+" }
+  ],
+  "regimes": [
+    "Trending Up",
+    "Trending Down",
+    "Ranging",
+    "Unclear"
+  ],
+  "docs": "https://usemoou.xyz/docs",
+  "version": "1.0.0"
+}
+```
+
+#### Accepted values for POST /compile
+
+Pass the **label** strings (not `id` values) in compile requests:
+
+| Field | Accepted values |
+|-------|-----------------|
+| `market` | `Crypto Futures` · `Crypto Spot` · `US Stocks (Tokenized)` |
+| `timeframe` | `Scalp (1–15m)` · `Swing (1H–4H)` · `Position (Daily+)` |
+| `regime` | `Trending Up` · `Trending Down` · `Ranging` · `Unclear` |
+
+---
+
+### GET /stats
+
+Aggregate usage counter for public API compilations.
+
+**Request**
+
+```http
+GET /api/v1/stats HTTP/1.1
+Host: usemoou.xyz
+```
+
+**Response** `200 OK`
+
+```json
+{
+  "total_compilations": 1247,
+  "status": "operational",
+  "version": "1.0.0"
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `total_compilations` | number | Cumulative successful `/compile` calls (Vercel KV). Returns `0` if KV is unavailable |
+| `status` | string | Service status |
+| `version` | string | API version |
+
+Always returns **HTTP 200**, even when the counter backend is unavailable.
+
+---
+
+### POST /compile
+
+Compile a plain-English trading strategy and return a structured spec with risk scoring in a single call.
+
+**Request**
+
+```http
+POST /api/v1/compile HTTP/1.1
+Host: usemoou.xyz
+Content-Type: application/json
+```
+
+**Body**
+
+```json
+{
+  "strategy": "Buy BTC when RSI drops below 30 on the 4H chart with funding rates negative for 3 consecutive hours",
+  "market": "Crypto Futures",
+  "timeframe": "Swing (1H–4H)",
+  "regime": "Ranging"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `strategy` | string | Yes | Trading idea in plain English (non-empty after trim) |
+| `market` | string | Yes | One of the supported market labels |
+| `timeframe` | string | Yes | One of the supported timeframe labels |
+| `regime` | string | Yes | One of the supported regime values |
+
+**Response** `200 OK`
+
+```json
+{
+  "strategy_name": "Sixty-Two Range Reversal",
+  "entry_conditions": "Place a limit buy order when RSI(14) on the 4H chart closes below 30 while funding rates have been negative for three consecutive hourly periods.",
+  "exit_conditions": "Take profit when RSI reaches 65. Deploy a hard stop loss at 2% below entry price.",
+  "position_sizing": "Allocate exactly 2% of total portfolio equity per trade. Never pyramid into losing positions.",
+  "market_regime": "ranging",
+  "regime_description": "Performs best when price oscillates within established support and resistance bands.",
+  "playbook_format": "Exploit established range boundaries on BTC perpetual futures. Enter long on RSI oversold confluence with negative funding. Exit on RSI 65 or 2% stop. Risk 2% per trade.",
+  "risk": {
+    "overall_score": 55,
+    "verdict": "MODERATE",
+    "volatility_exposure": 75,
+    "volatility_note": "RSI-based entries on 4H BTC carry significant volatility exposure during macro events.",
+    "drawdown_risk": 40,
+    "drawdown_note": "A defined 2% stop loss limits per-trade drawdown, though consecutive losses can compound.",
+    "leverage_sensitivity": 65,
+    "leverage_note": "Futures execution with funding rate filters increases sensitivity to leverage and margin calls.",
+    "regime_dependency": 75,
+    "regime_note": "Strategy is explicitly tuned for ranging conditions and may underperform in strong trends.",
+    "execution_complexity": 50,
+    "execution_note": "Requires monitoring RSI, funding rates, and 4H candle closes — moderate operational overhead."
+  },
+  "meta": {
+    "compiled_at": "2026-06-13T11:32:55.000Z",
+    "model": "qwen3.6-plus",
+    "version": "1.0.0",
+    "processing_ms": 1243,
+    "powered_by": "MÓOU 谋",
+    "docs": "https://usemoou.xyz/docs"
+  }
+}
+```
+
+**Typical latency:** 1–5 seconds (two sequential Qwen calls: compile + score).
+
+---
+
+## Response Schemas
+
+### Strategy fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `strategy_name` | string | Short memorable name (2–4 words) |
+| `entry_conditions` | string | Entry logic |
+| `exit_conditions` | string | Exit logic including stop loss and take profit |
+| `position_sizing` | string | Sizing methodology |
+| `market_regime` | string | `trending` · `ranging` · `neutral` |
+| `regime_description` | string | When the strategy performs best |
+| `playbook_format` | string | Bitget Playbook-ready instruction block |
+
+### Risk object
+
+| Field | Type | Range | Description |
+|-------|------|-------|-------------|
+| `overall_score` | number | 0–100 | Composite risk score |
+| `verdict` | string | — | `CONSERVATIVE` · `MODERATE` · `AGGRESSIVE` · `EXTREME` |
+| `volatility_exposure` | number | 0–100 | Sensitivity to price volatility |
+| `volatility_note` | string | — | Plain-English explanation |
+| `drawdown_risk` | number | 0–100 | Maximum loss potential |
+| `drawdown_note` | string | — | Plain-English explanation |
+| `leverage_sensitivity` | number | 0–100 | Impact of leverage on the strategy |
+| `leverage_note` | string | — | Plain-English explanation |
+| `regime_dependency` | number | 0–100 | Dependence on specific market conditions |
+| `regime_note` | string | — | Plain-English explanation |
+| `execution_complexity` | number | 0–100 | Operational difficulty to run live |
+| `execution_note` | string | — | Plain-English explanation |
+
+### Meta object
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `compiled_at` | string | ISO 8601 timestamp of completion |
+| `model` | string | AI model used |
+| `version` | string | API version |
+| `processing_ms` | number | End-to-end processing time in milliseconds |
+| `powered_by` | string | Service attribution |
+| `docs` | string | Documentation URL |
+
+---
+
+## Examples
+
+### cURL
+
+```bash
+curl -X POST https://usemoou.xyz/api/v1/compile \
+  -H "Content-Type: application/json" \
+  -d '{
+    "strategy": "Buy BTC when RSI drops below 30 on the 4H chart",
+    "market": "Crypto Futures",
+    "timeframe": "Swing (1H-4H)",
+    "regime": "Ranging"
+  }'
+```
+
+### JavaScript (fetch)
+
+```javascript
+const response = await fetch('https://usemoou.xyz/api/v1/compile', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    strategy: 'Buy BTC when RSI drops below 30 on the 4H chart',
+    market: 'Crypto Futures',
+    timeframe: 'Swing (1H-4H)',
+    regime: 'Ranging',
+  }),
+})
+
+const data = await response.json()
+
+if (!response.ok) {
+  console.error(data.error.code, data.error.message)
+} else {
+  console.log(data.strategy_name, data.risk.overall_score, data.risk.verdict)
+}
+```
+
+### Python (requests)
+
+```python
+import requests
+
+resp = requests.post(
+    "https://usemoou.xyz/api/v1/compile",
+    json={
+        "strategy": "Buy BTC when RSI drops below 30 on the 4H chart",
+        "market": "Crypto Futures",
+        "timeframe": "Swing (1H-4H)",
+        "regime": "Ranging",
+    },
+    timeout=30,
+)
+
+data = resp.json()
+if resp.ok:
+    print(data["strategy_name"], data["risk"]["verdict"])
+else:
+    print(data["error"]["code"], data["error"]["message"])
+```
+
+### Health check (monitoring)
+
+```bash
+curl -sf https://usemoou.xyz/api/v1/health | jq .status
+# Expected: "operational"
+```
+
+---
+
+## Operational Notes
+
+### Compilation counter (Vercel KV)
+
+Successful `/compile` responses increment a `moou_total_compilations` counter in Vercel KV. If KV is not configured, the counter silently skips incrementing and `/stats` returns `0`.
+
+**Setup (Vercel):**
+
+1. Vercel Dashboard → **Storage** → **KV Database**
+2. Add environment variables: `KV_URL`, `KV_REST_API_TOKEN`
+3. Redeploy
+
+### Internal routes (web app only)
+
+These routes power the MÓOU web UI and are **not** part of the public v1 API surface:
+
+| Route | Purpose |
+|-------|---------|
+| `POST /api/compile` | Strategy compilation only |
+| `POST /api/score` | Risk scoring only (requires prior compile output) |
+
+They require server-side `QWEN_KEY` and do not include CORS headers or public rate-limit metadata.
+
+### Recommended integration pattern
+
+```
+1. GET  /health   → confirm service is operational
+2. GET  /markets  → populate or validate form fields
+3. POST /compile   → compile + score in one call
+4. GET  /stats    → optional usage display
+```
+
+---
+
+## Disclaimer
+
+Outputs from the MÓOU API are generated by an AI model for **educational, research, and planning purposes only**. They do not constitute financial advice, investment recommendations, or solicitation to trade any asset. Trading cryptocurrencies and financial instruments involves significant risk of loss. Always conduct your own research before making trading decisions.
+
+---
+
+## Links
+
+| Resource | URL |
+|----------|-----|
+| Web app | [usemoou.xyz](https://usemoou.xyz) |
+| Interactive docs | [usemoou.xyz/docs](https://usemoou.xyz/docs) |
+| About & FAQ | [usemoou.xyz/about](https://usemoou.xyz/about) |
+| GitHub | [github.com/mojeebdev/moou](https://github.com/mojeebdev/moou) |
+| Health | [usemoou.xyz/api/v1/health](https://usemoou.xyz/api/v1/health) |
+
+**Built by:** Mojeeb Titilayo · [BlindspotLab](https://blindspotlab.xyz) · [@mojeebeth](https://x.com/mojeebeth)
+
+**Hackathon:** Bitget AI Base Camp S1 · Track 2: Trading Infra

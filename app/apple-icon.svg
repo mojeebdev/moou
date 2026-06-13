@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none" role="img" aria-label="MÓOU 谋">
+  <rect width="180" height="180" fill="#050508"/>
+  <rect x="1" y="1" width="178" height="178" stroke="#F5A623" stroke-opacity="0.35"/>
+  <text
+    x="90"
+    y="118"
+    text-anchor="middle"
+    font-family="'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif"
+    font-size="108"
+    font-weight="700"
+    fill="#F5A623"
+  >谋</text>
+</svg>
