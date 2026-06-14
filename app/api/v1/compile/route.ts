@@ -1,11 +1,11 @@
-// SETUP: Enable Vercel KV in your Vercel dashboard under Storage → KV Database.
-// Add KV_URL and KV_REST_API_TOKEN to environment variables.
-// If KV is not configured, counter silently fails and returns 0. App still works fully.
+// SETUP: Firebase Firestore for rate limiting (ratelimits) and stats (stats/global).
+// Env: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY, IP_SALT
+// If Firebase is not configured, rate limit fails open and counter is skipped.
 
 import { NextRequest, NextResponse } from 'next/server'
-import { kv } from '@vercel/kv'
 import type { Risk, Strategy } from '@/lib/types'
 import { API_VERSION, DOCS_URL, VALID_MARKETS } from '@/lib/api-constants'
+import { checkRateLimit, hashClientIp, incrementCompilationCount } from '@/lib/firebase-admin'
 
 const QWEN_URL = 'https://hackathon.bitgetops.com/v1/chat/completions'
 
@@ -14,11 +14,6 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 } as const
-
-const RATE_LIMIT_MAX = 10
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
-
-const rateLimitMap = new Map<string, number[]>()
 
 function jsonResponse(body: unknown, status: number) {
   return NextResponse.json(body, { status, headers: CORS_HEADERS })
@@ -43,21 +38,6 @@ function getClientIp(req: NextRequest): string {
     req.headers.get('x-real-ip') ??
     'unknown'
   )
-}
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const windowStart = now - RATE_LIMIT_WINDOW_MS
-  const timestamps = (rateLimitMap.get(ip) ?? []).filter((t) => t > windowStart)
-
-  if (timestamps.length >= RATE_LIMIT_MAX) {
-    rateLimitMap.set(ip, timestamps)
-    return true
-  }
-
-  timestamps.push(now)
-  rateLimitMap.set(ip, timestamps)
-  return false
 }
 
 function isValidMarket(market: string): boolean {
@@ -178,8 +158,10 @@ export async function OPTIONS() {
 export async function POST(req: NextRequest) {
   const startTime = Date.now()
   const ip = getClientIp(req)
+  const hashedIp = hashClientIp(ip)
 
-  if (isRateLimited(ip)) {
+  const allowed = await checkRateLimit(hashedIp)
+  if (!allowed) {
     return errorResponse(
       'RATE_LIMIT_EXCEEDED',
       '10 requests per hour per IP. Try again later.',
@@ -256,11 +238,7 @@ export async function POST(req: NextRequest) {
     },
   }
 
-  try {
-    await kv.incr('moou_total_compilations')
-  } catch {
-    // silently fail — don't break the response
-  }
+  await incrementCompilationCount()
 
   return jsonResponse(responseBody, 200)
 }

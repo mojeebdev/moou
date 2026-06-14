@@ -69,8 +69,10 @@ Open [http://localhost:3000](http://localhost:3000).
 |----------|----------|-------------|
 | `QWEN_KEY` | Yes | Qwen API key (Bitget hackathon Telegram community) |
 | `NEXT_PUBLIC_SITE_URL` | Recommended | Canonical URL for OG / social previews |
-| `KV_URL` | Optional | Vercel KV — public API compilation counter |
-| `KV_REST_API_TOKEN` | Optional | Vercel KV REST token |
+| `FIREBASE_PROJECT_ID` | Optional | Firebase project for rate limits + stats |
+| `FIREBASE_CLIENT_EMAIL` | Optional | Firebase Admin service account email |
+| `FIREBASE_PRIVATE_KEY` | Optional | Firebase Admin private key (JSON escaped) |
+| `IP_SALT` | Optional | Salt for hashing client IPs in Firestore |
 
 See [.env.example](./.env.example) for the full template.
 
@@ -81,7 +83,7 @@ See [.env.example](./.env.example) for the full template.
 | Framework | Next.js 16 App Router (TypeScript) |
 | AI | Qwen3.6-plus via Bitget hackathon proxy |
 | Chart | TradingView widget (Bitget symbols) |
-| Counter | Vercel KV (optional) |
+| Counter & rate limits | Firebase Firestore (optional) |
 | Styling | CSS variables + Tailwind CSS v4 |
 | Fonts | Playfair Display · Lora · DM Mono |
 | Deploy | Vercel |
@@ -111,7 +113,7 @@ API.md                     # Public API reference (this repo)
 1. Push to GitHub
 2. Connect repo to [Vercel](https://vercel.com)
 3. Set `QWEN_KEY` and `NEXT_PUBLIC_SITE_URL`
-4. Optional: enable **Vercel KV** for `/stats` counter (`KV_URL`, `KV_REST_API_TOKEN`)
+4. Optional: set **Firebase Admin** env vars for `/stats` counter and API rate limiting
 5. Deploy
 
 ## Judging — Track 2: Trading Infra

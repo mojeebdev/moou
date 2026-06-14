@@ -214,7 +214,7 @@ Host: usemoou.xyz
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `total_compilations` | number | Cumulative successful `/compile` calls (Vercel KV). Returns `0` if KV is unavailable |
+| `total_compilations` | number | Cumulative successful `/compile` calls (Firestore `stats/global`). Returns `0` if unavailable |
 | `status` | string | Service status |
 | `version` | string | API version |
 
@@ -408,15 +408,23 @@ curl -sf https://usemoou.xyz/api/v1/health | jq .status
 
 ## Operational Notes
 
-### Compilation counter (Vercel KV)
+### Compilation counter & rate limits (Firebase Firestore)
 
-Successful `/compile` responses increment a `moou_total_compilations` counter in Vercel KV. If KV is not configured, the counter silently skips incrementing and `/stats` returns `0`.
+Successful `/compile` responses increment `stats/global.total_compilations` in Firestore. Rate limits are stored in the `ratelimits` collection using SHA-256 + base64url hashed IPs (salted with `IP_SALT`). If Firebase is not configured, the counter returns `0` and rate limiting fails open.
 
-**Setup (Vercel):**
+**Firestore collections:**
 
-1. Vercel Dashboard → **Storage** → **KV Database**
-2. Add environment variables: `KV_URL`, `KV_REST_API_TOKEN`
-3. Redeploy
+| Collection | Document | Fields |
+|------------|----------|--------|
+| `stats` | `global` | `total_compilations` (number) |
+| `ratelimits` | `{hashedIp}` (16-char base64url) | `count`, `windowStartMs`, `updatedAt` |
+
+**Setup:**
+
+1. Create a Firebase project and enable Firestore
+2. Generate a service account key (Firebase Console → Project Settings → Service Accounts)
+3. Set environment variables: `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `IP_SALT`
+4. Redeploy
 
 ### Internal routes (web app only)
 

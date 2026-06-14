@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { kv } from '@vercel/kv'
 import { API_VERSION } from '@/lib/api-constants'
+import { getCompilationCount } from '@/lib/firebase-admin'
 
 export async function GET() {
   try {
-    const total = (await kv.get<number>('moou_total_compilations')) ?? 0
+    const total = await getCompilationCount()
     return NextResponse.json({
       total_compilations: total,
       status: 'operational',
