@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center px-[clamp(24px,6vw,80px)] border-b border-[var(--void-05)]"
+        className="fixed top-0 left-0 right-0 z-50 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between md:justify-normal px-[clamp(24px,6vw,80px)] border-b border-[var(--void-05)]"
         style={{
           height: 'var(--nav-height)',
           background: 'rgba(5, 5, 8, 0.88)',
@@ -40,7 +40,7 @@ export default function Navbar() {
         }}
       >
         {/* Left — brand */}
-        <div className="flex items-center min-w-0" style={{ gap: '12px' }}>
+        <div className="flex items-center min-w-0 md:col-start-1" style={{ gap: '12px' }}>
           <Link
             href="/"
             className="text-[22px] font-bold tracking-[-0.02em] text-[var(--accent)] no-underline shrink-0"
@@ -52,7 +52,7 @@ export default function Navbar() {
         </div>
 
         {/* Center — desktop nav */}
-        <div className="hidden md:flex items-center justify-center" style={{ gap: '36px' }}>
+        <div className="hidden md:flex items-center justify-center md:col-start-2" style={{ gap: '36px' }}>
           <NavDropdown label="Product" items={NAV_PRODUCT} />
           <Link href="/guide" className="hover:text-[var(--ink-primary)]" style={navLinkStyle}>
             User Guide
@@ -60,8 +60,8 @@ export default function Navbar() {
           <NavDropdown label="Developers" items={NAV_DEVELOPERS} />
         </div>
 
-        {/* Right — CTA desktop / menu mobile */}
-        <div className="flex items-center justify-end" style={{ gap: '16px' }}>
+        {/* Right — CTA desktop / hamburger mobile */}
+        <div className="flex items-center justify-end md:col-start-3 shrink-0" style={{ gap: '16px' }}>
           <Link
             href="/#compile"
             className="hidden md:inline-flex items-center justify-center no-underline transition-all hover:brightness-110"
@@ -80,19 +80,54 @@ export default function Navbar() {
           </Link>
           <button
             type="button"
-            className="md:hidden bg-transparent border-0 cursor-pointer uppercase"
+            className="md:hidden flex items-center justify-center bg-transparent border-0 cursor-pointer"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
             onClick={() => setMobileOpen((v) => !v)}
             style={{
-              fontFamily: 'var(--font-accent)',
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.1em',
-              color: 'var(--ink-primary)',
+              width: '44px',
+              height: '44px',
+              marginRight: '-10px',
+              padding: 0,
             }}
           >
-            {mobileOpen ? 'Close' : 'Menu'}
+            <span className="sr-only">{mobileOpen ? 'Close menu' : 'Open menu'}</span>
+            <span
+              aria-hidden
+              className="relative block"
+              style={{ width: '22px', height: '16px' }}
+            >
+              <span
+                className="absolute left-0 block transition-all duration-200"
+                style={{
+                  top: mobileOpen ? '7px' : '0',
+                  width: '22px',
+                  height: '2px',
+                  background: mobileOpen ? 'var(--accent)' : 'var(--ink-primary)',
+                  transform: mobileOpen ? 'rotate(45deg)' : 'none',
+                }}
+              />
+              <span
+                className="absolute left-0 block transition-all duration-200"
+                style={{
+                  top: '7px',
+                  width: '22px',
+                  height: '2px',
+                  background: 'var(--ink-primary)',
+                  opacity: mobileOpen ? 0 : 1,
+                }}
+              />
+              <span
+                className="absolute left-0 block transition-all duration-200"
+                style={{
+                  top: mobileOpen ? '7px' : '14px',
+                  width: '22px',
+                  height: '2px',
+                  background: mobileOpen ? 'var(--accent)' : 'var(--ink-primary)',
+                  transform: mobileOpen ? 'rotate(-45deg)' : 'none',
+                }}
+              />
+            </span>
           </button>
         </div>
       </nav>
