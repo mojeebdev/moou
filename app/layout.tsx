@@ -78,6 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${fontDisplay.variable} ${fontBody.variable} ${fontAccent.variable}`}
     >
       <head>
+        <link rel="preconnect" href="https://s3.tradingview.com" />
+        <link rel="dns-prefetch" href="https://s3.tradingview.com" />
         <link
           rel="preload"
           as="image"
@@ -91,6 +93,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="/images/hero-mobile.png"
           media="(max-width: 768px)"
           fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="video"
+          href="/videos/hero-desktop.mp4"
+          media="(min-width: 769px)"
+          type="video/mp4"
+        />
+        <link
+          rel="preload"
+          as="video"
+          href="/videos/hero-mobile.mp4"
+          media="(max-width: 768px)"
+          type="video/mp4"
+        />
+        <link
+          rel="prefetch"
+          href="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"
+          as="script"
         />
       </head>
       <body>

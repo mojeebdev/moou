@@ -1,6 +1,30 @@
 'use client'
 
-import TradingViewChart from '@/components/TradingViewChart'
+import dynamic from 'next/dynamic'
+
+const TradingViewChart = dynamic(() => import('@/components/TradingViewChart'), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        width: '100%',
+        height: '500px',
+        marginBottom: '32px',
+        background: '#050508',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'var(--font-accent)',
+        fontSize: '11px',
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+        color: 'var(--ink-tertiary)',
+      }}
+    >
+      Loading chart…
+    </div>
+  ),
+})
 
 interface CompileSectionProps {
   userInput: string

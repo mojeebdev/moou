@@ -2,15 +2,25 @@
 
 import { useEffect, useRef, useState } from 'react'
 
-const WIDGET_CONTAINER_ID = 'moou-tradingview-chart'
-const TV_SCRIPT_SRC = 'https://s3.tradingview.com/tv.js'
+const WIDGET_SCRIPT_SRC =
+  'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'
 
-declare global {
-  interface Window {
-    TradingView?: {
-      widget: new (config: Record<string, unknown>) => void
-    }
-  }
+const CHART_CONFIG = {
+  autosize: true,
+  symbol: 'BITGET:BTCUSDT',
+  interval: '240',
+  timezone: 'Etc/UTC',
+  theme: 'dark',
+  style: '1',
+  locale: 'en',
+  allow_symbol_change: true,
+  backgroundColor: '#050508',
+  gridColor: 'rgba(44,44,58,0.5)',
+  hide_top_toolbar: false,
+  hide_legend: false,
+  hide_side_toolbar: false,
+  save_image: false,
+  support_host: 'https://www.tradingview.com',
 }
 
 function getChartHeight() {
@@ -18,14 +28,27 @@ function getChartHeight() {
   return window.innerWidth <= 768 ? 300 : 500
 }
 
+function preloadChartScript() {
+  if (document.querySelector(`script[src="${WIDGET_SCRIPT_SRC}"]`)) return
+
+  const link = document.createElement('link')
+  link.rel = 'preload'
+  link.as = 'script'
+  link.href = WIDGET_SCRIPT_SRC
+  document.head.appendChild(link)
+}
+
 export default function TradingViewChart() {
   const containerRef = useRef<HTMLDivElement>(null)
   const gateRef = useRef<HTMLDivElement>(null)
-  const widgetReady = useRef(false)
+  const mountedRef = useRef(false)
   const [chartHeight, setChartHeight] = useState(500)
   const [shouldLoad, setShouldLoad] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
+    preloadChartScript()
+
     const updateHeight = () => setChartHeight(getChartHeight())
     updateHeight()
     window.addEventListener('resize', updateHeight)
@@ -43,7 +66,7 @@ export default function TradingViewChart() {
           observer.disconnect()
         }
       },
-      { rootMargin: '240px' }
+      { rootMargin: '600px 0px' }
     )
 
     observer.observe(el)
@@ -51,65 +74,56 @@ export default function TradingViewChart() {
   }, [])
 
   useEffect(() => {
-    if (!shouldLoad) return
-    widgetReady.current = false
-    if (containerRef.current) containerRef.current.innerHTML = ''
+    if (!shouldLoad || !containerRef.current) return
 
-    const mountWidget = () => {
-      if (widgetReady.current || !window.TradingView || !containerRef.current) return
+    mountedRef.current = false
+    setIsLoading(true)
+    containerRef.current.innerHTML = ''
 
-      containerRef.current.innerHTML = ''
-      widgetReady.current = true
+    const wrapper = document.createElement('div')
+    wrapper.className = 'tradingview-widget-container'
+    wrapper.style.cssText = 'width:100%;height:100%;margin:0;'
 
-      new window.TradingView.widget({
-        symbol: 'BITGET:BTCUSDT',
-        interval: '240',
-        timezone: 'Etc/UTC',
-        theme: 'dark',
-        style: '1',
-        locale: 'en',
-        toolbar_bg: '#0C0C12',
-        backgroundColor: '#050508',
-        gridColor: 'rgba(44,44,58,0.5)',
-        allow_symbol_change: true,
-        save_image: false,
-        hide_side_toolbar: false,
-        withdateranges: true,
-        details: true,
-        hotlist: true,
-        calendar: false,
-        width: '100%',
-        height: chartHeight,
-        container_id: WIDGET_CONTAINER_ID,
-      })
-    }
+    const widget = document.createElement('div')
+    widget.className = 'tradingview-widget-container__widget'
+    widget.style.cssText = 'width:100%;height:100%;'
 
-    if (window.TradingView) {
-      mountWidget()
-      return () => {
-        widgetReady.current = false
-        if (containerRef.current) containerRef.current.innerHTML = ''
+    const script = document.createElement('script')
+    script.type = 'text/javascript'
+    script.src = WIDGET_SCRIPT_SRC
+    script.async = true
+    script.textContent = JSON.stringify(CHART_CONFIG)
+
+    const markLoaded = () => {
+      if (!mountedRef.current) {
+        mountedRef.current = true
+        setIsLoading(false)
       }
     }
 
-    let script = document.querySelector<HTMLScriptElement>(`script[src="${TV_SCRIPT_SRC}"]`)
+    const iframeObserver = new MutationObserver(() => {
+      if (containerRef.current?.querySelector('iframe')) {
+        markLoaded()
+        iframeObserver.disconnect()
+      }
+    })
 
-    if (!script) {
-      script = document.createElement('script')
-      script.src = TV_SCRIPT_SRC
-      script.async = true
-      document.head.appendChild(script)
-    }
+    iframeObserver.observe(containerRef.current, { childList: true, subtree: true })
+    script.addEventListener('load', markLoaded)
+    const fallbackTimer = window.setTimeout(markLoaded, 5000)
 
-    script.addEventListener('load', mountWidget)
-    if (window.TradingView) mountWidget()
+    wrapper.appendChild(widget)
+    wrapper.appendChild(script)
+    containerRef.current.appendChild(wrapper)
 
     return () => {
-      script?.removeEventListener('load', mountWidget)
-      widgetReady.current = false
+      iframeObserver.disconnect()
+      script.removeEventListener('load', markLoaded)
+      window.clearTimeout(fallbackTimer)
+      mountedRef.current = false
       if (containerRef.current) containerRef.current.innerHTML = ''
     }
-  }, [chartHeight, shouldLoad])
+  }, [shouldLoad])
 
   return (
     <div ref={gateRef} style={{ width: '100%', margin: 0, marginBottom: '32px' }}>
@@ -130,28 +144,38 @@ export default function TradingViewChart() {
       </p>
 
       <div
-        id={WIDGET_CONTAINER_ID}
         ref={containerRef}
         className="chart-container"
-        style={{ width: '100%', height: `${chartHeight}px`, margin: 0, background: '#050508' }}
+        style={{
+          width: '100%',
+          height: `${chartHeight}px`,
+          margin: 0,
+          background: '#050508',
+          position: 'relative',
+        }}
       >
-        {!shouldLoad && (
+        {(!shouldLoad || isLoading) && (
           <div
             className="chart-loading"
             style={{
-              width: '100%',
-              height: '100%',
+              position: 'absolute',
+              inset: 0,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '12px',
               fontFamily: 'var(--font-accent)',
               fontSize: '11px',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
               color: 'var(--ink-tertiary)',
+              background: '#050508',
+              zIndex: 1,
             }}
           >
-            Chart loads when in view
+            <div className="chart-spinner" />
+            {shouldLoad ? 'Loading chart…' : 'Chart loads when in view'}
           </div>
         )}
       </div>

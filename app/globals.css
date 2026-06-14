@@ -95,6 +95,19 @@ section {
   padding: 0 clamp(24px, 6vw, 80px);
 }
 
+.chart-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--void-05);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: chart-spin 0.8s linear infinite;
+}
+
+@keyframes chart-spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(8px); }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const DESKTOP_POSTER = '/images/hero-desktop.png'
 const MOBILE_POSTER = '/images/hero-mobile.png'
@@ -8,47 +8,28 @@ const DESKTOP_VIDEO = '/videos/hero-desktop.mp4'
 const MOBILE_VIDEO = '/videos/hero-mobile.mp4'
 
 export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [count, setCount] = useState<number | null>(null)
-  const [posterLoaded, setPosterLoaded] = useState(false)
-  const [showVideo, setShowVideo] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
+  const [videoReady, setVideoReady] = useState(false)
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 768px)')
-    const update = () => setIsMobile(mq.matches)
-    update()
-    mq.addEventListener('change', update)
+    const video = videoRef.current
+    if (!video) return
 
-    const poster = document.querySelector<HTMLImageElement>('.hero-section picture img')
-    if (poster?.complete && poster.naturalWidth > 0) {
-      setPosterLoaded(true)
+    const markReady = () => setVideoReady(true)
+
+    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      markReady()
     }
 
-    return () => mq.removeEventListener('change', update)
-  }, [])
+    video.addEventListener('canplay', markReady)
+    video.addEventListener('loadeddata', markReady)
 
-  useEffect(() => {
-    if (!posterLoaded) return
-
-    let cancelled = false
-    const startVideo = () => {
-      if (!cancelled) setShowVideo(true)
-    }
-
-    if (typeof window.requestIdleCallback === 'function') {
-      const id = window.requestIdleCallback(startVideo, { timeout: 3000 })
-      return () => {
-        cancelled = true
-        window.cancelIdleCallback(id)
-      }
-    }
-
-    const timer = setTimeout(startVideo, 2000)
     return () => {
-      cancelled = true
-      clearTimeout(timer)
+      video.removeEventListener('canplay', markReady)
+      video.removeEventListener('loadeddata', markReady)
     }
-  }, [posterLoaded])
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -65,9 +46,6 @@ export default function Hero() {
     }
   }, [])
 
-  const videoSrc = isMobile ? MOBILE_VIDEO : DESKTOP_VIDEO
-  const posterSrc = isMobile ? MOBILE_POSTER : DESKTOP_POSTER
-
   return (
     <section
       className="hero-section relative overflow-hidden"
@@ -82,7 +60,10 @@ export default function Hero() {
       }}
     >
       {/* Poster: correct image via picture — no JS required for first paint */}
-      <picture className="absolute inset-0 z-0 block">
+      <picture
+        className="absolute inset-0 z-0 block transition-opacity duration-700"
+        style={{ opacity: videoReady ? 0 : 1 }}
+      >
         <source media="(max-width: 768px)" srcSet={MOBILE_POSTER} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -91,25 +72,24 @@ export default function Hero() {
           aria-hidden
           fetchPriority="high"
           decoding="async"
-          onLoad={() => setPosterLoaded(true)}
           className="w-full h-full object-cover object-center"
         />
       </picture>
 
-      {showVideo && (
-        <video
-          key={videoSrc}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="none"
-          poster={posterSrc}
-          className="absolute inset-0 w-full h-full object-cover object-center z-0"
-        >
-          <source src={videoSrc} type="video/mp4" />
-        </video>
-      )}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        poster={DESKTOP_POSTER}
+        className="absolute inset-0 w-full h-full object-cover object-center z-0 transition-opacity duration-700"
+        style={{ opacity: videoReady ? 1 : 0 }}
+      >
+        <source media="(max-width: 768px)" src={MOBILE_VIDEO} type="video/mp4" />
+        <source src={DESKTOP_VIDEO} type="video/mp4" />
+      </video>
 
       <div
         className="absolute inset-0 z-[1]"
