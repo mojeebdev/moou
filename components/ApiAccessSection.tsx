@@ -77,10 +77,14 @@ export default function ApiAccessSection() {
             User guide
           </a>
           . Need help?{' '}
+          <a href="mailto:support@usemoou.xyz" style={{ color: 'var(--accent)' }}>
+            support@usemoou.xyz
+          </a>
+          {' · '}
           <a href="https://github.com/mojeebdev/moou/issues" style={{ color: 'var(--accent)' }}>
             GitHub Issues
-          </a>{' '}
-          or{' '}
+          </a>
+          {' · '}
           <a href="https://x.com/mojeebeth" style={{ color: 'var(--accent)' }}>
             @mojeebeth
           </a>

@@ -102,6 +102,7 @@ Paste it into any LLM, replace the last line with your goal (e.g. *"compile this
 
 | Channel | Use for |
 |---------|---------|
+| [support@usemoou.xyz](mailto:support@usemoou.xyz) | Direct support, partnerships, general inquiries |
 | [GitHub Issues](https://github.com/mojeebdev/moou/issues) | Bugs, API questions, integration help |
 | [@mojeebeth on X](https://x.com/mojeebeth) | Quick questions, hackathon updates |
 | [Bitget Hackathon Telegram](https://t.me/+o1tYqQ_lXxllYjgy) | Playbook keys, Qwen credits, hackathon support |

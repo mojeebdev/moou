@@ -124,6 +124,7 @@ export default function Footer() {
 
           {/* Column 4 — Support */}
           <FooterColumn label="Support">
+            <FooterLink href="mailto:support@usemoou.xyz">support@usemoou.xyz</FooterLink>
             <FooterLink href="https://github.com/mojeebdev/moou/issues">GitHub Issues</FooterLink>
             <FooterLink href="https://x.com/mojeebeth">@mojeebeth on X</FooterLink>
             <FooterLink href="https://t.me/+o1tYqQ_lXxllYjgy">Hackathon Telegram</FooterLink>

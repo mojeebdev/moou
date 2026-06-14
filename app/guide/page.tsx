@@ -396,6 +396,10 @@ Upload → Backtest → Publish on Bitget Playbook`}
               Need help?
             </p>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--ink-secondary)', lineHeight: 2 }}>
+              <a href="mailto:support@usemoou.xyz" style={{ color: 'var(--accent)' }}>
+                support@usemoou.xyz
+              </a>
+              {' · '}
               <a href="https://github.com/mojeebdev/moou/issues" style={{ color: 'var(--accent)' }}>
                 GitHub Issues
               </a>
