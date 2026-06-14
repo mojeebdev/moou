@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { incrementCompilationCount } from '@/lib/firebase-admin'
 
 export async function POST(req: NextRequest) {
   const { strategy, market, timeframe } = await req.json()
@@ -58,6 +59,7 @@ Output ONLY this exact JSON:
 
   try {
     const parsed = JSON.parse(clean)
+    await incrementCompilationCount()
     return NextResponse.json(parsed)
   } catch {
     return NextResponse.json({ error: 'Parse failed' }, { status: 500 })
