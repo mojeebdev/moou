@@ -26,10 +26,12 @@ export const metadata: Metadata = {
 }
 
 const STACK_ITEMS = [
-  { label: 'Framework', value: 'Next.js 16' },
+  { label: 'Framework', value: 'Next.js 16.2 · React 19 · TypeScript 5' },
   { label: 'AI Model (Alibaba Cloud)', value: 'Qwen3.6-plus' },
-  { label: 'API Endpoint', value: 'Bitget Proxy' },
+  { label: 'AI Proxy', value: 'hackathon.bitgetops.com' },
+  { label: 'Public API', value: 'REST · OpenAPI 3.1 · MCP' },
   { label: 'Chart Widget', value: 'TradingView' },
+  { label: 'Stats & Limits', value: 'Firebase Firestore' },
   { label: 'Deployment', value: 'Vercel' },
   { label: 'Strategy Vault', value: 'localStorage' },
 ] as const
@@ -173,8 +175,8 @@ export default function AboutPage() {
                   marginBottom: '16px',
                 }}
               >
-                Integrate via REST API, MCP tools for Cursor and Claude Code, or paste the integration
-                prompt into any LLM workflow. OpenAPI spec included.
+                Integrate via REST API, MCP (Cursor, Grok Build, Claude Code, Windsurf), or paste the
+                integration prompt into ChatGPT, Codex, Gemini, or any LLM. OpenAPI spec included.
               </p>
               <Link href="/docs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-accent)', fontSize: '13px' }}>
                 Read Developer Docs →

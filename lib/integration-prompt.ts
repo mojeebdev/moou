@@ -1,5 +1,5 @@
 /**
- * Drop-in prompt for any LLM (ChatGPT, Claude, Cursor, Codex, etc.)
+ * Drop-in prompt for any LLM (ChatGPT, Claude, Grok, Codex, Gemini, etc.)
  * to integrate with the MÓOU public API and Bitget Playbook workflow.
  */
 export const INTEGRATION_PROMPT = `You are helping me integrate with MÓOU (谋) — a natural language trading strategy compiler and risk scoring API.
@@ -34,9 +34,10 @@ Help me compile trading ideas into structured strategy specs with risk scores, t
 5. Optional — score only: POST /score with existing strategy object + market + timeframe
 6. Optional — Playbook deploy: POST /deploy-prompt with strategy + risk → returns getagent prompt for @bitget-ai/getagent-skill
 
-## MCP (Cursor / Claude Code)
+## MCP (agent IDEs)
 
 MÓOU has an MCP server with tools: moou_compile, moou_score, moou_deploy_prompt
+Works in: Cursor, Claude Code, Grok Build, Windsurf, Cline, and any MCP-compatible client
 Setup: https://github.com/mojeebdev/moou/tree/main/mcp-server
 
 ## Bitget Playbook deploy (after compile)

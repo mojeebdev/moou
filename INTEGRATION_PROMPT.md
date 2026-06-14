@@ -1,6 +1,6 @@
 # MÓOU Integration Prompt
 
-Copy everything below the line into **any LLM** (ChatGPT, Claude, Cursor, Codex, etc.) to fast-track MÓOU API integration.
+Copy everything below the line into **any LLM** (ChatGPT, Claude, Grok, Codex, Gemini, Cursor chat, etc.) to fast-track MÓOU API integration.
 
 Also available at [usemoou.xyz/docs](https://usemoou.xyz/docs) with a one-click copy button.
 
@@ -39,9 +39,10 @@ Help me compile trading ideas into structured strategy specs with risk scores, t
 5. Optional — score only: POST /score with existing strategy object + market + timeframe
 6. Optional — Playbook deploy: POST /deploy-prompt with strategy + risk → returns getagent prompt for @bitget-ai/getagent-skill
 
-## MCP (Cursor / Claude Code)
+## MCP (agent IDEs)
 
 MÓOU has an MCP server with tools: moou_compile, moou_score, moou_deploy_prompt
+Works in: Cursor, Claude Code, Grok Build, Windsurf, Cline, and any MCP-compatible client
 Setup: https://github.com/mojeebdev/moou/tree/main/mcp-server
 
 ## Bitget Playbook deploy (after compile)

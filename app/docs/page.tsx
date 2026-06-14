@@ -180,11 +180,12 @@ export default function DocsPage() {
                 <strong style={{ color: 'var(--ink-primary)' }}>MCP server</strong> —{' '}
                 <code style={{ color: 'var(--ink-primary)' }}>moou_compile</code>,{' '}
                 <code style={{ color: 'var(--ink-primary)' }}>moou_score</code>,{' '}
-                <code style={{ color: 'var(--ink-primary)' }}>moou_deploy_prompt</code> for Cursor / Claude Code
+                <code style={{ color: 'var(--ink-primary)' }}>moou_deploy_prompt</code> for Cursor, Grok Build,
+                Claude Code, Windsurf, Cline
               </li>
               <li>
-                <strong style={{ color: 'var(--ink-primary)' }}>Integration prompt</strong> — paste into any LLM
-                session so the model knows how to call MÓOU correctly
+                <strong style={{ color: 'var(--ink-primary)' }}>Integration prompt</strong> — paste into ChatGPT,
+                Claude, Grok, Codex, Gemini, or any chat LLM
               </li>
             </ul>
           </div>
@@ -230,7 +231,8 @@ export default function DocsPage() {
               <code style={{ color: 'var(--ink-primary)' }}>POST /compile</code> — your first programmatic compile
             </li>
             <li>
-              Optional: <a href="https://github.com/mojeebdev/moou/tree/main/mcp-server" style={{ color: 'var(--accent)' }}>MCP server</a> for Cursor / Claude Code agents
+              Optional: <a href="https://github.com/mojeebdev/moou/tree/main/mcp-server" style={{ color: 'var(--accent)' }}>MCP server</a> (Cursor, Grok Build, Claude Code) or{' '}
+              <a href="#integration-prompt" style={{ color: 'var(--accent)' }}>integration prompt</a> (Codex, ChatGPT, Gemini)
             </li>
           </ol>
         </div>
@@ -263,7 +265,7 @@ export default function DocsPage() {
               marginBottom: '24px',
             }}
           >
-            Drop this into any LLM to fast-track API integration. Edit the last line with your goal
+            Drop this into ChatGPT, Claude, Grok, Codex, Gemini, or any LLM to fast-track API integration. Edit the last line with your goal
             before pasting. Also in{' '}
             <a
               href="https://github.com/mojeebdev/moou/blob/main/INTEGRATION_PROMPT.md"
@@ -518,14 +520,20 @@ export default function DocsPage() {
             >
               MCP Server
             </p>
-            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 1.8, marginBottom: '16px' }}>
               Tools: <code style={{ color: 'var(--ink-primary)' }}>moou_compile</code>,{' '}
               <code style={{ color: 'var(--ink-primary)' }}>moou_score</code>,{' '}
-              <code style={{ color: 'var(--ink-primary)' }}>moou_deploy_prompt</code>. See{' '}
+              <code style={{ color: 'var(--ink-primary)' }}>moou_deploy_prompt</code>.
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
+              <strong style={{ color: 'var(--ink-primary)' }}>MCP clients:</strong> Cursor · Grok Build · Claude Code · Windsurf · Cline
+              <br />
+              <strong style={{ color: 'var(--ink-primary)' }}>Chat LLMs (use integration prompt above):</strong> ChatGPT · Codex · Grok · Gemini · Claude
+              <br />
+              Setup:{' '}
               <a href="https://github.com/mojeebdev/moou/tree/main/mcp-server" style={{ color: 'var(--accent)' }}>
                 mcp-server/README.md
-              </a>{' '}
-              in the repo.
+              </a>
             </p>
           </div>
         </div>

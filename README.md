@@ -41,9 +41,13 @@ Five minutes to your first API compile:
 1. `curl -s https://usemoou.xyz/api/v1/health`
 2. `GET /api/v1/markets` for valid `market`, `timeframe`, and `regime` values
 3. `POST /api/v1/compile` with your strategy JSON (see example below)
-4. Optional: [MCP server](./mcp-server/README.md) · [Integration Prompt](./INTEGRATION_PROMPT.md) · [OpenAPI](https://usemoou.xyz/api/v1/openapi)
+4. Pick your integration path (all optional):
+   - **REST API** — any language, any agent runtime
+   - **Integration prompt** — paste into ChatGPT, Claude, Grok, Codex, Gemini, etc.
+   - **MCP server** — Cursor, Claude Code, Grok Build, Windsurf, Cline
+   - **OpenAPI** — [usemoou.xyz/api/v1/openapi](https://usemoou.xyz/api/v1/openapi)
 
-Interactive reference: [Developer Docs](https://usemoou.xyz/docs) · [API.md](./API.md)
+Interactive reference: [Developer Docs](https://usemoou.xyz/docs) · [API.md](./API.md) · [MCP setup](./mcp-server/README.md) · [Integration Prompt](./INTEGRATION_PROMPT.md)
 
 **Need help?** [GitHub Issues](https://github.com/mojeebdev/moou/issues) · [@mojeebeth](https://x.com/mojeebeth) · [Bitget Hackathon Telegram](https://t.me/+o1tYqQ_lXxllYjgy)
 
@@ -107,9 +111,15 @@ Open [http://localhost:3000](http://localhost:3000).
 
 See [.env.example](./.env.example) for the full template.
 
-## MCP Server (Cursor / Claude Code)
+## Agent & LLM Integration
 
-Agents can call MÓOU as MCP tools — `moou_compile`, `moou_score`, `moou_deploy_prompt`.
+| Method | Best for |
+|--------|----------|
+| **REST API** | Scripts, backends, custom bots — `POST /api/v1/compile` |
+| **Integration prompt** | ChatGPT · Claude · Grok · Codex · Gemini · any chat LLM |
+| **MCP server** | Cursor · Claude Code · Grok Build · Windsurf · Cline |
+
+MCP tools: `moou_compile` · `moou_score` · `moou_deploy_prompt`
 
 ```bash
 cd mcp-server && npm install && npm run build
@@ -121,12 +131,15 @@ Setup: [mcp-server/README.md](./mcp-server/README.md)
 
 | Layer | Technology |
 |-------|------------|
-| Framework | Next.js 16 App Router (TypeScript) |
-| AI | Qwen3.6-plus via Bitget hackathon proxy |
-| Chart | TradingView widget (Bitget symbols) |
-| Counter & rate limits | Firebase Firestore (optional) |
-| Styling | CSS variables + Tailwind CSS v4 |
-| Fonts | Playfair Display · Lora · DM Mono |
+| Framework | Next.js 16.2 (App Router) · React 19 · TypeScript 5 |
+| AI | Qwen3.6-plus via `hackathon.bitgetops.com` (Bitget hackathon proxy) |
+| Public API | Next.js Route Handlers — `/api/v1/*` + OpenAPI 3.1 |
+| Agent bridge | MCP server (stdio) + copy-paste integration prompt |
+| Chart | TradingView embedded widget (Bitget symbols) |
+| Stats & rate limits | Firebase Firestore (optional) |
+| Styling | Tailwind CSS v4 + CSS variables |
+| Fonts | Playfair Display · Lora · DM Mono (`next/font`) |
+| Analytics | Vercel Analytics |
 | Deploy | Vercel |
 
 ## Project Structure
@@ -150,7 +163,7 @@ app/
       deploy-prompt/route.ts # POST — getagent deploy prompt
 components/                # UI sections
 lib/                       # moou-engine, API helpers, OpenAPI, nav config
-mcp-server/                # MCP tools for Cursor / Claude Code
+mcp-server/                # MCP tools for agent IDEs (Cursor, Grok Build, etc.)
 API.md                     # Public API reference (this repo)
 INTEGRATION_PROMPT.md      # LLM integration prompt (copy-paste)
 ```
@@ -170,7 +183,7 @@ INTEGRATION_PROMPT.md      # LLM integration prompt (copy-paste)
 ✅ Low-friction integration — no API key during hackathon  
 ✅ Runnable demo with verifiable usage  
 ✅ Bitget Playbook-compatible output + getagent deploy bridge  
-✅ MCP server for Cursor / Claude Code agent integration  
+✅ MCP server + integration prompt for Cursor, Grok Build, Codex, and other LLMs
 ✅ OpenAPI 3.1 spec at `/api/v1/openapi`  
 ✅ Qwen3.6-plus as AI engine (Alibaba strategic sponsor)
 

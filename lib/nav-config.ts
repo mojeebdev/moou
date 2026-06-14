@@ -13,7 +13,7 @@ export const NAV_DEVELOPERS: NavDropdownItem[] = [
   {
     label: 'MCP Server',
     href: 'https://github.com/mojeebdev/moou/tree/main/mcp-server',
-    description: 'Cursor & Claude Code tools',
+    description: 'Cursor, Grok Build, Codex & more',
     external: true,
   },
   {

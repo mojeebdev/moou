@@ -29,12 +29,17 @@ const FAQ_ITEMS = [
   {
     question: 'Can I deploy the compiled strategy directly?',
     answer:
-      'Yes. MÓOU gives you a pre-structured spec and a getagent deploy prompt. Paste that into Claude Code / Cursor with @bitget-ai/getagent-skill installed, add your own Playbook API key, and getagent handles upload, backtest, and publish on Bitget Playbook.',
+      'Yes. MÓOU gives you a pre-structured spec and a getagent deploy prompt. Paste that into Claude Code, Cursor, Grok Build, or Codex with @bitget-ai/getagent-skill installed, add your own Playbook API key, and getagent handles upload, backtest, and publish on Bitget Playbook.',
   },
   {
     question: 'Do I use your Playbook API key or mine?',
     answer:
       'Yours. Each developer gets a Playbook API key from Bitget Playbook → Create Agent. Pass it as playbook_key in POST /deploy-prompt or paste it into the copied getagent prompt. MÓOU does not store or share keys.',
+  },
+  {
+    question: 'How do developers integrate MÓOU?',
+    answer:
+      'Three paths: REST API (any language), MCP server (Cursor, Grok Build, Claude Code, Windsurf), or copy the integration prompt into ChatGPT, Codex, Gemini, or any LLM. See usemoou.xyz/docs.',
   },
   {
     question: 'Is there a rate limit on the API?',

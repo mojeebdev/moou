@@ -90,7 +90,7 @@ Response includes `strategy_name`, structured entry/exit/sizing, `risk` scores, 
 | Client codegen | `GET /api/v1/openapi` — OpenAPI 3.1 spec |
 | Risk-only calls | `POST /api/v1/score` — when you already have a structured spec |
 | Bitget Playbook | `POST /api/v1/deploy-prompt` or copy **getagent Deploy Prompt** from the web UI |
-| Any LLM assistant | Copy [INTEGRATION_PROMPT.md](./INTEGRATION_PROMPT.md) — drop into ChatGPT, Claude, Cursor, etc. |
+| Any LLM assistant | Copy [INTEGRATION_PROMPT.md](./INTEGRATION_PROMPT.md) — ChatGPT, Claude, Grok, Codex, Gemini, etc. |
 
 ### LLM Integration Prompt
 
@@ -459,7 +459,9 @@ Host: usemoou.xyz
 
 ## MCP Server
 
-Cursor and Claude Code agents can call MÓOU via MCP. See [`mcp-server/README.md`](./mcp-server/README.md).
+Agent IDEs with MCP support can call MÓOU natively — **Cursor**, **Claude Code**, **Grok Build**, **Windsurf**, **Cline**, and others. See [`mcp-server/README.md`](./mcp-server/README.md).
+
+For **Codex**, **ChatGPT**, **Gemini**, and other chat LLMs without MCP, use the [Integration Prompt](./INTEGRATION_PROMPT.md) instead.
 
 | Tool | Description |
 |------|-------------|

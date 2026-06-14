@@ -236,7 +236,7 @@ export default function GuidePage() {
             </h3>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
               Click <strong style={{ color: 'var(--ink-primary)' }}>Copy getagent Deploy Prompt</strong>. This copies a
-              complete instruction block for Claude Code, Cursor, or any agent with the{' '}
+              complete instruction block for Claude Code, Cursor, Grok Build, Codex, or any agent with the{' '}
               <a
                 href="https://www.npmjs.com/package/@bitget-ai/getagent-skill"
                 style={{ color: 'var(--accent)' }}
@@ -301,7 +301,7 @@ export default function GuidePage() {
                 .
               </li>
               <li>
-                <strong style={{ color: 'var(--ink-primary)' }}>Install getagent</strong> — in Claude Code or Cursor:{' '}
+                <strong style={{ color: 'var(--ink-primary)' }}>Install getagent</strong> — in Claude Code, Cursor, Grok Build, or Codex:{' '}
                 <code style={{ color: 'var(--ink-primary)', fontSize: '13px' }}>@bitget-ai/getagent-skill</code>
               </li>
               <li>

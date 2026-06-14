@@ -68,7 +68,7 @@ export default function ApiAccessSection() {
             maxWidth: '640px',
           }}
         >
-          Public API — no key required.{' '}
+          Public API — no key required. Works with REST, MCP (Cursor, Grok Build), or paste the integration prompt into Codex, ChatGPT, and other LLMs.{' '}
           <a href="/docs" style={{ color: 'var(--accent)' }}>
             Developer docs
           </a>
