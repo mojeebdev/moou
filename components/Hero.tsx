@@ -4,13 +4,29 @@ import { useEffect, useState } from 'react'
 
 export default function Hero() {
   const [count, setCount] = useState<number | null>(null)
+  const [videoReady, setVideoReady] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    fetch('/api/v1/stats')
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    setVideoReady(true)
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetch('/api/v1/stats', { signal: controller.signal })
       .then((r) => r.json())
       .then((d) => setCount(d.total_compilations))
       .catch(() => {})
+    return () => controller.abort()
   }, [])
+
+  const posterSrc = isMobile ? '/images/hero-mobile.png' : '/images/hero-desktop.png'
+  const videoSrc = isMobile ? '/videos/hero-mobile.mp4' : '/videos/hero-desktop.mp4'
 
   return (
     <section
@@ -25,26 +41,30 @@ export default function Hero() {
         textAlign: 'left',
       }}
     >
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        poster="/images/hero-desktop.png"
-        className="hero-desktop absolute inset-0 w-full h-full object-cover object-center z-0 hidden md:block"
-      >
-        <source src="/videos/hero-desktop.mp4" type="video/mp4" />
-      </video>
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        poster="/images/hero-mobile.png"
-        className="hero-mobile absolute inset-0 w-full h-full object-cover object-center z-0 block md:hidden"
-      >
-        <source src="/videos/hero-mobile.mp4" type="video/mp4" />
-      </video>
+      {/* Poster loads instantly; only one video mounts after viewport is known */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={posterSrc}
+        alt=""
+        aria-hidden
+        fetchPriority="high"
+        className="absolute inset-0 w-full h-full object-cover object-center z-0"
+      />
+
+      {videoReady && (
+        <video
+          key={videoSrc}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          poster={posterSrc}
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+      )}
 
       <div
         className="absolute inset-0 z-[1]"

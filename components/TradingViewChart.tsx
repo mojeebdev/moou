@@ -20,8 +20,10 @@ function getChartHeight() {
 
 export default function TradingViewChart() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const gateRef = useRef<HTMLDivElement>(null)
   const widgetReady = useRef(false)
   const [chartHeight, setChartHeight] = useState(500)
+  const [shouldLoad, setShouldLoad] = useState(false)
 
   useEffect(() => {
     const updateHeight = () => setChartHeight(getChartHeight())
@@ -31,6 +33,25 @@ export default function TradingViewChart() {
   }, [])
 
   useEffect(() => {
+    const el = gateRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '240px' }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!shouldLoad) return
     widgetReady.current = false
     if (containerRef.current) containerRef.current.innerHTML = ''
 
@@ -88,10 +109,10 @@ export default function TradingViewChart() {
       widgetReady.current = false
       if (containerRef.current) containerRef.current.innerHTML = ''
     }
-  }, [chartHeight])
+  }, [chartHeight, shouldLoad])
 
   return (
-    <div style={{ width: '100%', margin: 0, marginBottom: '32px' }}>
+    <div ref={gateRef} style={{ width: '100%', margin: 0, marginBottom: '32px' }}>
       <p
         style={{
           fontFamily: 'var(--font-accent)',
@@ -113,7 +134,27 @@ export default function TradingViewChart() {
         ref={containerRef}
         className="chart-container"
         style={{ width: '100%', height: `${chartHeight}px`, margin: 0, background: '#050508' }}
-      />
+      >
+        {!shouldLoad && (
+          <div
+            className="chart-loading"
+            style={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'var(--font-accent)',
+              fontSize: '11px',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              color: 'var(--ink-tertiary)',
+            }}
+          >
+            Chart loads when in view
+          </div>
+        )}
+      </div>
     </div>
   )
 }

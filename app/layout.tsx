@@ -1,6 +1,30 @@
 import type { Metadata } from 'next'
 import { Analytics } from '@vercel/analytics/react'
+import { DM_Mono, Lora, Playfair_Display } from 'next/font/google'
 import './globals.css'
+
+const fontDisplay = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+  weight: ['400', '600', '700', '900'],
+  style: ['normal', 'italic'],
+})
+
+const fontBody = Lora({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+  weight: ['400', '500'],
+  style: ['normal', 'italic'],
+})
+
+const fontAccent = DM_Mono({
+  subsets: ['latin'],
+  variable: '--font-accent',
+  display: 'swap',
+  weight: ['300', '400', '500'],
+})
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
@@ -49,7 +73,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${fontDisplay.variable} ${fontBody.variable} ${fontAccent.variable}`}
+    >
       <body>
         {children}
         <Analytics />
