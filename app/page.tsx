@@ -1,14 +1,16 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useEffect, useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import CompileSection from '@/components/CompileSection'
-import OutputSection from '@/components/OutputSection'
-import VaultSection from '@/components/VaultSection'
-import HowItWorks from '@/components/HowItWorks'
-import Footer from '@/components/Footer'
 import Toast from '@/components/Toast'
+
+const OutputSection = dynamic(() => import('@/components/OutputSection'))
+const VaultSection = dynamic(() => import('@/components/VaultSection'))
+const HowItWorks = dynamic(() => import('@/components/HowItWorks'))
+const Footer = dynamic(() => import('@/components/Footer'))
 import type { Risk, Strategy, VaultEntry, VaultMeta } from '@/lib/types'
 import { loadFromVault, loadVault, saveToVault } from '@/lib/vault'
 

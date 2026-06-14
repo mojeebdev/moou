@@ -12,9 +12,13 @@ export default function ApiStatusBadge({ variant = 'navbar' }: ApiStatusBadgePro
   const [status, setStatus] = useState<ApiStatus>('checking')
 
   useEffect(() => {
-    fetch('/api/v1/health')
-      .then((r) => (r.ok ? setStatus('operational') : setStatus('down')))
-      .catch(() => setStatus('down'))
+    const timer = window.setTimeout(() => {
+      fetch('/api/v1/health')
+        .then((r) => (r.ok ? setStatus('operational') : setStatus('down')))
+        .catch(() => setStatus('down'))
+    }, 1500)
+
+    return () => window.clearTimeout(timer)
   }, [])
 
   const isOperational = status === 'operational'

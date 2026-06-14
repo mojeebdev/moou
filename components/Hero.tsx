@@ -2,31 +2,71 @@
 
 import { useEffect, useState } from 'react'
 
+const DESKTOP_POSTER = '/images/hero-desktop.png'
+const MOBILE_POSTER = '/images/hero-mobile.png'
+const DESKTOP_VIDEO = '/videos/hero-desktop.mp4'
+const MOBILE_VIDEO = '/videos/hero-mobile.mp4'
+
 export default function Hero() {
   const [count, setCount] = useState<number | null>(null)
-  const [videoReady, setVideoReady] = useState(false)
+  const [posterLoaded, setPosterLoaded] = useState(false)
+  const [showVideo, setShowVideo] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)')
     const update = () => setIsMobile(mq.matches)
     update()
-    setVideoReady(true)
     mq.addEventListener('change', update)
+
+    const poster = document.querySelector<HTMLImageElement>('.hero-section picture img')
+    if (poster?.complete && poster.naturalWidth > 0) {
+      setPosterLoaded(true)
+    }
+
     return () => mq.removeEventListener('change', update)
   }, [])
 
   useEffect(() => {
+    if (!posterLoaded) return
+
+    let cancelled = false
+    const startVideo = () => {
+      if (!cancelled) setShowVideo(true)
+    }
+
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(startVideo, { timeout: 3000 })
+      return () => {
+        cancelled = true
+        window.cancelIdleCallback(id)
+      }
+    }
+
+    const timer = setTimeout(startVideo, 2000)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [posterLoaded])
+
+  useEffect(() => {
     const controller = new AbortController()
-    fetch('/api/v1/stats', { signal: controller.signal })
-      .then((r) => r.json())
-      .then((d) => setCount(d.total_compilations))
-      .catch(() => {})
-    return () => controller.abort()
+    const timer = window.setTimeout(() => {
+      fetch('/api/v1/stats', { signal: controller.signal })
+        .then((r) => r.json())
+        .then((d) => setCount(d.total_compilations))
+        .catch(() => {})
+    }, 1200)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(timer)
+    }
   }, [])
 
-  const posterSrc = isMobile ? '/images/hero-mobile.png' : '/images/hero-desktop.png'
-  const videoSrc = isMobile ? '/videos/hero-mobile.mp4' : '/videos/hero-desktop.mp4'
+  const videoSrc = isMobile ? MOBILE_VIDEO : DESKTOP_VIDEO
+  const posterSrc = isMobile ? MOBILE_POSTER : DESKTOP_POSTER
 
   return (
     <section
@@ -41,24 +81,29 @@ export default function Hero() {
         textAlign: 'left',
       }}
     >
-      {/* Poster loads instantly; only one video mounts after viewport is known */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={posterSrc}
-        alt=""
-        aria-hidden
-        fetchPriority="high"
-        className="absolute inset-0 w-full h-full object-cover object-center z-0"
-      />
+      {/* Poster: correct image via picture — no JS required for first paint */}
+      <picture className="absolute inset-0 z-0 block">
+        <source media="(max-width: 768px)" srcSet={MOBILE_POSTER} />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={DESKTOP_POSTER}
+          alt=""
+          aria-hidden
+          fetchPriority="high"
+          decoding="async"
+          onLoad={() => setPosterLoaded(true)}
+          className="w-full h-full object-cover object-center"
+        />
+      </picture>
 
-      {videoReady && (
+      {showVideo && (
         <video
           key={videoSrc}
           autoPlay
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="none"
           poster={posterSrc}
           className="absolute inset-0 w-full h-full object-cover object-center z-0"
         >

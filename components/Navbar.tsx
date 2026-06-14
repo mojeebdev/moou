@@ -31,7 +31,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center justify-between md:justify-normal px-[clamp(24px,6vw,80px)] border-b border-[var(--void-05)]"
+        className="fixed top-0 left-0 right-0 z-50 flex md:grid md:grid-cols-[1fr_auto_1fr] items-center max-md:pl-[10%] max-md:pr-6 md:px-[clamp(24px,6vw,80px)] border-b border-[var(--void-05)]"
         style={{
           height: 'var(--nav-height)',
           background: 'rgba(5, 5, 8, 0.88)',
@@ -39,58 +39,20 @@ export default function Navbar() {
           WebkitBackdropFilter: 'blur(16px)',
         }}
       >
-        {/* Left — brand */}
-        <div className="flex items-center min-w-0 md:col-start-1" style={{ gap: '12px' }}>
-          <Link
-            href="/"
-            className="text-[22px] font-bold tracking-[-0.02em] text-[var(--accent)] no-underline shrink-0"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            MÓOU · 谋
-          </Link>
-          <ApiStatusBadge variant="navbar" />
-        </div>
-
-        {/* Center — desktop nav */}
-        <div className="hidden md:flex items-center justify-center md:col-start-2" style={{ gap: '36px' }}>
-          <NavDropdown label="Product" items={NAV_PRODUCT} />
-          <Link href="/guide" className="hover:text-[var(--ink-primary)]" style={navLinkStyle}>
-            User Guide
-          </Link>
-          <NavDropdown label="Developers" items={NAV_DEVELOPERS} />
-        </div>
-
-        {/* Right — CTA desktop / hamburger mobile */}
-        <div className="flex items-center justify-end md:col-start-3 shrink-0" style={{ gap: '16px' }}>
-          <Link
-            href="/#compile"
-            className="hidden md:inline-flex items-center justify-center no-underline transition-all hover:brightness-110"
-            style={{
-              fontFamily: 'var(--font-accent)',
-              fontWeight: 600,
-              fontSize: '11px',
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              padding: '10px 18px',
-              background: 'var(--accent)',
-              color: '#0a0a0a',
-            }}
-          >
-            Compile
-          </Link>
-          <button
-            type="button"
-            className="md:hidden flex items-center justify-center bg-transparent border-0 cursor-pointer"
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
-            style={{
-              width: '44px',
-              height: '44px',
-              marginRight: '-10px',
-              padding: 0,
-            }}
-          >
+        {/* Mobile — hamburger left */}
+        <button
+          type="button"
+          className="md:hidden flex items-center justify-center bg-transparent border-0 cursor-pointer shrink-0"
+          aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+          style={{
+            width: '44px',
+            height: '44px',
+            marginRight: '12px',
+            padding: 0,
+          }}
+        >
             <span className="sr-only">{mobileOpen ? 'Close menu' : 'Open menu'}</span>
             <span
               aria-hidden
@@ -128,7 +90,47 @@ export default function Navbar() {
                 }}
               />
             </span>
-          </button>
+        </button>
+
+        {/* Brand */}
+        <div className="flex items-center min-w-0 flex-1 md:flex-none md:col-start-1" style={{ gap: '12px' }}>
+          <Link
+            href="/"
+            className="text-[22px] font-bold tracking-[-0.02em] text-[var(--accent)] no-underline shrink-0"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            MÓOU · 谋
+          </Link>
+          <ApiStatusBadge variant="navbar" />
+        </div>
+
+        {/* Center — desktop nav */}
+        <div className="hidden md:flex items-center justify-center md:col-start-2" style={{ gap: '36px' }}>
+          <NavDropdown label="Product" items={NAV_PRODUCT} />
+          <Link href="/guide" className="hover:text-[var(--ink-primary)]" style={navLinkStyle}>
+            User Guide
+          </Link>
+          <NavDropdown label="Developers" items={NAV_DEVELOPERS} />
+        </div>
+
+        {/* Right — desktop CTA */}
+        <div className="hidden md:flex items-center justify-end md:col-start-3 shrink-0" style={{ gap: '16px' }}>
+          <Link
+            href="/#compile"
+            className="inline-flex items-center justify-center no-underline transition-all hover:brightness-110"
+            style={{
+              fontFamily: 'var(--font-accent)',
+              fontWeight: 600,
+              fontSize: '11px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              padding: '10px 18px',
+              background: 'var(--accent)',
+              color: '#0a0a0a',
+            }}
+          >
+            Compile
+          </Link>
         </div>
       </nav>
 

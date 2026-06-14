@@ -77,6 +77,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${fontDisplay.variable} ${fontBody.variable} ${fontAccent.variable}`}
     >
+      <head>
+        <link
+          rel="preload"
+          as="image"
+          href="/images/hero-desktop.png"
+          media="(min-width: 769px)"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/images/hero-mobile.png"
+          media="(max-width: 768px)"
+          fetchPriority="high"
+        />
+      </head>
       <body>
         {children}
         <Analytics />
