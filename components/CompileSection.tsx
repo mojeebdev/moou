@@ -1,27 +1,6 @@
-import dynamic from 'next/dynamic'
+'use client'
 
-const TradingViewChart = dynamic(() => import('@/components/TradingViewChart'), {
-  ssr: false,
-      loading: () => (
-    <div
-      className="chart-loading"
-      style={{
-        width: '100%',
-        height: '500px',
-        margin: '0 0 32px',
-        background: '#050508',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: 'var(--ink-tertiary)',
-        fontFamily: 'var(--font-accent)',
-        fontSize: '12px',
-      }}
-    >
-      Loading chart…
-    </div>
-  ),
-})
+import TradingViewChart from '@/components/TradingViewChart'
 
 interface CompileSectionProps {
   userInput: string
@@ -186,7 +165,7 @@ export default function CompileSection({
         <button
           onClick={onCompile}
           disabled={isLoading}
-          className="w-full rounded-lg bg-[var(--accent)] text-black text-[13px] uppercase tracking-[0.1em] transition-all hover:opacity-88 hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full rounded-lg bg-[var(--accent)] text-black text-[13px] uppercase tracking-[0.1em] transition-all hover:brightness-110 hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
           style={{
             fontFamily: 'var(--font-accent)',
             fontWeight: 500,

@@ -8,18 +8,44 @@ Natural language → structured strategy + risk score + Bitget Playbook output.
 | | |
 |---|---|
 | **Live app** | [usemoou.xyz](https://usemoou.xyz) |
-| **API docs** | [usemoou.xyz/docs](https://usemoou.xyz/docs) · [API.md](./API.md) |
+| **User guide** | [usemoou.xyz/guide](https://usemoou.xyz/guide) |
+| **Developer docs** | [usemoou.xyz/docs](https://usemoou.xyz/docs) · [API.md](./API.md) |
 | **Health** | [usemoou.xyz/api/v1/health](https://usemoou.xyz/api/v1/health) |
 
 ## What It Does
 
 MÓOU takes any trading idea in plain English and outputs:
 
-1. Structured strategy spec (entry, exit, position sizing, market regime)
-2. Risk score (0–100) across 5 dimensions with plain-English breakdown
-3. Bitget Playbook-ready output — copy directly into Bitget's platform
+1. **Structured strategy spec** — entry, exit, position sizing, market regime
+2. **Risk score (0–100)** — five dimensions with plain-English breakdown
+3. **Bitget Playbook-ready output** — copy directly into Playbook or hand off via getagent deploy prompt
 
-The web app includes a live TradingView chart (search any Bitget-listed asset), a local strategy vault (localStorage, max 10 entries), and pages for About, FAQ, and API documentation.
+The web app includes a live TradingView chart (search any Bitget-listed asset), a local strategy vault (localStorage, max 10 entries), and dedicated pages for users ([Guide](https://usemoou.xyz/guide)), developers ([Docs](https://usemoou.xyz/docs)), and [About](https://usemoou.xyz/about).
+
+## For Users (Traders & Bitget Agent)
+
+No code required. Unlimited compiles on the website.
+
+1. Go to [usemoou.xyz](https://usemoou.xyz) → **Compile** — describe your strategy, pick market/timeframe/regime
+2. Review the structured spec and risk score
+3. Deploy to Bitget Playbook:
+   - **Path A** — *Copy for Bitget Playbook* (`playbook_format` text for manual paste)
+   - **Path B** — *Copy getagent Deploy Prompt* (full upload → backtest → publish loop with `@bitget-ai/getagent-skill`)
+
+Full walkthrough: [User Guide](https://usemoou.xyz/guide)
+
+## For Developers
+
+Five minutes to your first API compile:
+
+1. `curl -s https://usemoou.xyz/api/v1/health`
+2. `GET /api/v1/markets` for valid `market`, `timeframe`, and `regime` values
+3. `POST /api/v1/compile` with your strategy JSON (see example below)
+4. Optional: [MCP server](./mcp-server/README.md) · [Integration Prompt](./INTEGRATION_PROMPT.md) · [OpenAPI](https://usemoou.xyz/api/v1/openapi)
+
+Interactive reference: [Developer Docs](https://usemoou.xyz/docs) · [API.md](./API.md)
+
+**Need help?** [GitHub Issues](https://github.com/mojeebdev/moou/issues) · [@mojeebeth](https://x.com/mojeebeth) · [Bitget Hackathon Telegram](https://t.me/+o1tYqQ_lXxllYjgy)
 
 ## Public API
 
@@ -29,7 +55,8 @@ MÓOU ships a versioned public REST API for developers and agents.
 Base URL:  https://usemoou.xyz/api/v1
 Version:   1.0.0
 Auth:      None (hackathon period)
-Rate cap:  10 POST /compile requests per IP per hour
+Rate cap:  30 POST requests per IP per hour (/compile and /score)
+           Website UI is unlimited — rate limit applies to public API only
 ```
 
 | Method | Endpoint | Description |
@@ -37,7 +64,10 @@ Rate cap:  10 POST /compile requests per IP per hour
 | `GET` | `/health` | Liveness, model, and version |
 | `GET` | `/markets` | Supported markets, timeframes, regimes |
 | `GET` | `/stats` | Total public API compilations |
+| `GET` | `/openapi` | OpenAPI 3.1 machine-readable spec |
 | `POST` | `/compile` | Compile + risk score (single call) |
+| `POST` | `/score` | Risk score for existing strategy spec |
+| `POST` | `/deploy-prompt` | getagent Playbook deploy prompt |
 
 **Full reference:** [API.md](./API.md) (schemas, error codes, examples in cURL / JS / Python)  
 **Interactive docs:** [usemoou.xyz/docs](https://usemoou.xyz/docs)
@@ -73,8 +103,19 @@ Open [http://localhost:3000](http://localhost:3000).
 | `FIREBASE_CLIENT_EMAIL` | Optional | Firebase Admin service account email |
 | `FIREBASE_PRIVATE_KEY` | Optional | Firebase Admin private key (JSON escaped) |
 | `IP_SALT` | Optional | Salt for hashing client IPs in Firestore |
+| `RATE_LIMIT_MAX` | Optional | Public API requests per IP per hour (default: `30`) |
 
 See [.env.example](./.env.example) for the full template.
+
+## MCP Server (Cursor / Claude Code)
+
+Agents can call MÓOU as MCP tools — `moou_compile`, `moou_score`, `moou_deploy_prompt`.
+
+```bash
+cd mcp-server && npm install && npm run build
+```
+
+Setup: [mcp-server/README.md](./mcp-server/README.md)
 
 ## Stack
 
@@ -94,6 +135,7 @@ See [.env.example](./.env.example) for the full template.
 app/
   page.tsx                 # Main compile flow
   about/page.tsx           # About, FAQ, disclaimer
+  guide/page.tsx           # User guide — Playbook deploy paths
   docs/page.tsx            # Interactive API docs
   api/
     compile/route.ts       # Internal — compile only
@@ -102,10 +144,15 @@ app/
       health/route.ts      # GET  — liveness probe
       markets/route.ts     # GET  — markets / timeframes / regimes
       stats/route.ts       # GET  — usage counter
+      openapi/route.ts     # GET  — OpenAPI 3.1 spec
       compile/route.ts     # POST — public compile + score
+      score/route.ts       # POST — risk score only
+      deploy-prompt/route.ts # POST — getagent deploy prompt
 components/                # UI sections
-lib/                       # Types, vault, risk helpers, API constants
+lib/                       # moou-engine, API helpers, OpenAPI, nav config
+mcp-server/                # MCP tools for Cursor / Claude Code
 API.md                     # Public API reference (this repo)
+INTEGRATION_PROMPT.md      # LLM integration prompt (copy-paste)
 ```
 
 ## Deployment
@@ -122,7 +169,9 @@ API.md                     # Public API reference (this repo)
 ✅ Public REST API with health, discovery, stats, and structured errors  
 ✅ Low-friction integration — no API key during hackathon  
 ✅ Runnable demo with verifiable usage  
-✅ Bitget Playbook-compatible output  
+✅ Bitget Playbook-compatible output + getagent deploy bridge  
+✅ MCP server for Cursor / Claude Code agent integration  
+✅ OpenAPI 3.1 spec at `/api/v1/openapi`  
 ✅ Qwen3.6-plus as AI engine (Alibaba strategic sponsor)
 
 ## Credits

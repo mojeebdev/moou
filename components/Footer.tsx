@@ -101,7 +101,8 @@ export default function Footer() {
 
           {/* Column 2 — Project */}
           <FooterColumn label="Project">
-            <FooterInternalLink href="/docs">API Docs</FooterInternalLink>
+            <FooterInternalLink href="/guide">User Guide</FooterInternalLink>
+            <FooterInternalLink href="/docs">Developer Docs</FooterInternalLink>
             <FooterLink href="/api/v1/health">Health</FooterLink>
             <FooterInternalLink href="/about">About</FooterInternalLink>
             <FooterInternalLink href="/about#faq">FAQ</FooterInternalLink>
@@ -121,12 +122,13 @@ export default function Footer() {
             <FooterLink href="https://foresightventures.com/">Foresight Ventures</FooterLink>
           </FooterColumn>
 
-          {/* Column 4 — Connect */}
-          <FooterColumn label="Connect">
+          {/* Column 4 — Support */}
+          <FooterColumn label="Support">
+            <FooterLink href="https://github.com/mojeebdev/moou/issues">GitHub Issues</FooterLink>
             <FooterLink href="https://x.com/mojeebeth">@mojeebeth on X</FooterLink>
-            <FooterLink href="https://mojeeb.xyz">mojeeb.xyz</FooterLink>
-            <FooterLink href="https://blindspotlab.xyz">blindspotlab.xyz</FooterLink>
-            <FooterLink href="https://qwenlm.github.io/">Qwen (Alibaba)</FooterLink>
+            <FooterLink href="https://t.me/+o1tYqQ_lXxllYjgy">Hackathon Telegram</FooterLink>
+            <FooterInternalLink href="/guide">User Guide</FooterInternalLink>
+            <FooterLink href="https://blindspotlab.xyz">BlindspotLab</FooterLink>
           </FooterColumn>
         </div>
 

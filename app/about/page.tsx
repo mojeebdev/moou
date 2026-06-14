@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import HowItWorks from '@/components/HowItWorks'
@@ -81,9 +82,105 @@ export default function AboutPage() {
               maxWidth: '640px',
             }}
           >
-            MÓOU (谋) is a natural language trading strategy compiler built for the Bitget AI Base Camp
-            Hackathon S1, Track 2: Trading Infra.
+            MÓOU (谋) turns plain-English trading ideas into structured strategy specs, a five-dimension
+            risk score, and Bitget Playbook-ready output — before you place a single trade.
           </p>
+        </div>
+      </section>
+
+      {/* Who it's for */}
+      <section
+        style={{
+          padding: '0 clamp(24px, 6vw, 80px) 80px',
+          background: 'var(--void-01)',
+        }}
+      >
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '28px',
+              color: 'var(--ink-primary)',
+              marginBottom: '24px',
+            }}
+          >
+            Who it&apos;s for
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              style={{
+                background: 'var(--void-02)',
+                border: '1px solid var(--void-05)',
+                borderLeft: '3px solid var(--accent)',
+                padding: '32px',
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: 'var(--font-accent)',
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--accent)',
+                  marginBottom: '12px',
+                }}
+              >
+                Traders &amp; Bitget Agent users
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '15px',
+                  color: 'var(--ink-secondary)',
+                  lineHeight: 1.8,
+                  marginBottom: '16px',
+                }}
+              >
+                Describe your idea on the web app, review the risk breakdown, then deploy via Playbook copy
+                or the getagent loop. No code. Unlimited compiles on the website.
+              </p>
+              <Link href="/guide" style={{ color: 'var(--accent)', fontFamily: 'var(--font-accent)', fontSize: '13px' }}>
+                Read the User Guide →
+              </Link>
+            </div>
+            <div
+              style={{
+                background: 'var(--void-02)',
+                border: '1px solid var(--void-05)',
+                borderLeft: '3px solid var(--risk-low)',
+                padding: '32px',
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: 'var(--font-accent)',
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--risk-low)',
+                  marginBottom: '12px',
+                }}
+              >
+                Developers &amp; agent builders
+              </p>
+              <p
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: '15px',
+                  color: 'var(--ink-secondary)',
+                  lineHeight: 1.8,
+                  marginBottom: '16px',
+                }}
+              >
+                Integrate via REST API, MCP tools for Cursor and Claude Code, or paste the integration
+                prompt into any LLM workflow. OpenAPI spec included.
+              </p>
+              <Link href="/docs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-accent)', fontSize: '13px' }}>
+                Read Developer Docs →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

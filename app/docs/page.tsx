@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ApiStatusBadge from '@/components/ApiStatusBadge'
 import CopyCodeButton from '@/components/CopyCodeButton'
+import { INTEGRATION_PROMPT } from '@/lib/integration-prompt'
 
 export const metadata: Metadata = {
   title: 'MÓOU API Docs',
@@ -97,7 +98,7 @@ export default function DocsPage() {
               marginBottom: '16px',
             }}
           >
-            Developer Docs
+            Developer Documentation
           </span>
           <h1
             style={{
@@ -121,15 +122,164 @@ export default function DocsPage() {
               maxWidth: '640px',
             }}
           >
-            The MÓOU API is publicly accessible. Compile and score trading strategies programmatically.
-            No API key required.
+            Integrate MÓOU into agents, bots, and internal tools. REST API, MCP server, OpenAPI spec, and a
+            copy-paste LLM integration prompt. No API key during the hackathon.
           </p>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '15px',
+              color: 'var(--ink-tertiary)',
+              lineHeight: 1.7,
+              marginTop: '16px',
+            }}
+          >
+            Using MÓOU as a trader? See the{' '}
+            <a href="/guide" style={{ color: 'var(--accent)' }}>
+              User Guide
+            </a>{' '}
+            — Playbook deploy paths are documented there, not here.
+          </p>
+          <div
+            style={{
+              marginTop: '32px',
+              background: 'var(--void-02)',
+              border: '1px solid var(--void-05)',
+              padding: '24px 32px',
+              maxWidth: '640px',
+            }}
+          >
+            <p
+              style={{
+                fontFamily: 'var(--font-accent)',
+                fontSize: '11px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'var(--accent)',
+                marginBottom: '12px',
+              }}
+            >
+              Three ways to integrate
+            </p>
+            <ul
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                color: 'var(--ink-secondary)',
+                lineHeight: 2,
+                paddingLeft: '20px',
+              }}
+            >
+              <li>
+                <strong style={{ color: 'var(--ink-primary)' }}>REST API</strong> —{' '}
+                <code style={{ color: 'var(--ink-primary)' }}>POST /compile</code>,{' '}
+                <code style={{ color: 'var(--ink-primary)' }}>/score</code>,{' '}
+                <code style={{ color: 'var(--ink-primary)' }}>/deploy-prompt</code>
+              </li>
+              <li>
+                <strong style={{ color: 'var(--ink-primary)' }}>MCP server</strong> —{' '}
+                <code style={{ color: 'var(--ink-primary)' }}>moou_compile</code>,{' '}
+                <code style={{ color: 'var(--ink-primary)' }}>moou_score</code>,{' '}
+                <code style={{ color: 'var(--ink-primary)' }}>moou_deploy_prompt</code> for Cursor / Claude Code
+              </li>
+              <li>
+                <strong style={{ color: 'var(--ink-primary)' }}>Integration prompt</strong> — paste into any LLM
+                session so the model knows how to call MÓOU correctly
+              </li>
+            </ul>
+          </div>
           <ApiStatusBadge variant="pill" />
         </div>
       </section>
 
-      {/* Base URL */}
+      {/* Getting Started */}
       <section style={{ padding: '80px clamp(24px, 6vw, 80px)', background: 'var(--void-01)' }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '28px',
+              color: 'var(--ink-primary)',
+              marginBottom: '24px',
+            }}
+          >
+            Get Started in 5 Steps
+          </h2>
+          <ol
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontWeight: 400,
+              fontSize: '16px',
+              color: 'var(--ink-secondary)',
+              lineHeight: 2,
+              paddingLeft: '24px',
+              marginBottom: '32px',
+            }}
+          >
+            <li>
+              Try the <a href="/#compile" style={{ color: 'var(--accent)' }}>web app</a> — no API key, no rate limit
+            </li>
+            <li>
+              <code style={{ color: 'var(--ink-primary)' }}>GET /health</code> — confirm the API is operational
+            </li>
+            <li>
+              <code style={{ color: 'var(--ink-primary)' }}>GET /markets</code> — valid market, timeframe, regime labels
+            </li>
+            <li>
+              <code style={{ color: 'var(--ink-primary)' }}>POST /compile</code> — your first programmatic compile
+            </li>
+            <li>
+              Optional: <a href="https://github.com/mojeebdev/moou/tree/main/mcp-server" style={{ color: 'var(--accent)' }}>MCP server</a> for Cursor / Claude Code agents
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      {/* Integration Prompt */}
+      <section
+        id="integration-prompt"
+        style={{ padding: '0 clamp(24px, 6vw, 80px) 80px', background: 'var(--void-01)' }}
+      >
+        <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+          <h2
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '28px',
+              color: 'var(--ink-primary)',
+              marginBottom: '16px',
+            }}
+          >
+            LLM Integration Prompt
+          </h2>
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontWeight: 400,
+              fontSize: '16px',
+              color: 'var(--ink-secondary)',
+              lineHeight: 1.8,
+              marginBottom: '24px',
+            }}
+          >
+            Drop this into any LLM to fast-track API integration. Edit the last line with your goal
+            before pasting. Also in{' '}
+            <a
+              href="https://github.com/mojeebdev/moou/blob/main/INTEGRATION_PROMPT.md"
+              style={{ color: 'var(--accent)' }}
+            >
+              INTEGRATION_PROMPT.md
+            </a>{' '}
+            on GitHub.
+          </p>
+          <pre style={{ ...codeBlockStyle, maxHeight: '420px', overflowY: 'auto' }}>{INTEGRATION_PROMPT}</pre>
+          <CopyCodeButton text={INTEGRATION_PROMPT} label="Copy Integration Prompt" />
+        </div>
+      </section>
+
+      {/* Base URL */}
+      <section style={{ padding: '0 clamp(24px, 6vw, 80px) 80px', background: 'var(--void-01)' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
           <h2
             style={{
@@ -266,7 +416,7 @@ export default function DocsPage() {
 
             <SectionLabel>Try it</SectionLabel>
             <pre style={codeBlockStyle}>{CURL_EXAMPLE}</pre>
-            <CopyCodeButton text={CURL_EXAMPLE} label="Copy" />
+            <CopyCodeButton text={CURL_EXAMPLE} label="Copy cURL" variant="secondary" />
 
             <SectionLabel>Error Codes</SectionLabel>
             <div style={{ border: '1px solid var(--void-05)', background: 'var(--void-02)', overflowX: 'auto' }}>
@@ -292,7 +442,7 @@ export default function DocsPage() {
                   <tr style={{ borderBottom: '1px solid var(--void-05)' }}>
                     <td style={{ padding: '12px 16px', color: 'var(--ink-primary)' }}>RATE_LIMIT_EXCEEDED</td>
                     <td style={{ padding: '12px 16px' }}>429</td>
-                    <td style={{ padding: '12px 16px' }}>10 req/hour per IP</td>
+                    <td style={{ padding: '12px 16px' }}>30 req/hour per IP (API only)</td>
                   </tr>
                   <tr>
                     <td style={{ padding: '12px 16px', color: 'var(--ink-primary)' }}>COMPILATION_FAILED</td>
@@ -302,6 +452,81 @@ export default function DocsPage() {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* POST /score */}
+          <div style={cardStyle}>
+            <MethodBadge method="POST" />
+            <p style={{ fontFamily: 'var(--font-accent)', fontSize: '16px', color: 'var(--ink-primary)', marginBottom: '12px' }}>
+              /score
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', marginBottom: '16px' }}>
+              Score risk for an existing structured strategy. Composable primitive for agents that already have a spec.
+            </p>
+            <pre style={codeBlockStyle}>{`{
+  "strategy": {
+    "strategy_name": "...",
+    "entry_conditions": "...",
+    "exit_conditions": "...",
+    "position_sizing": "..."
+  },
+  "market": "Crypto Futures",
+  "timeframe": "Swing (1H-4H)"
+}`}</pre>
+          </div>
+
+          {/* POST /deploy-prompt */}
+          <div id="deploy-prompt" style={cardStyle}>
+            <MethodBadge method="POST" />
+            <p style={{ fontFamily: 'var(--font-accent)', fontSize: '16px', color: 'var(--ink-primary)', marginBottom: '12px' }}>
+              /deploy-prompt — Playbook Bridge
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', marginBottom: '16px', lineHeight: 1.8 }}>
+              Closes the loop from MÓOU compile → Bitget Playbook. Returns a getagent-ready prompt.
+              Pass your own <code style={{ color: 'var(--ink-primary)' }}>playbook_key</code> (from Playbook →
+              Create Agent) to embed it in the prompt — never stored on our servers. Not rate-limited.
+            </p>
+            <pre style={codeBlockStyle}>{`{
+  "strategy": { "...compiled fields...", "playbook_format": "..." },
+  "risk": { "...optional risk object..." },
+  "playbook_key": "your-playbook-api-key"
+}`}</pre>
+          </div>
+
+          {/* GET /openapi */}
+          <div style={cardStyle}>
+            <MethodBadge method="GET" />
+            <p style={{ fontFamily: 'var(--font-accent)', fontSize: '16px', color: 'var(--ink-primary)', marginBottom: '12px' }}>
+              /openapi
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)' }}>
+              OpenAPI 3.1 specification for client generation and agent discovery.
+            </p>
+          </div>
+
+          {/* MCP */}
+          <div style={cardStyle}>
+            <p
+              style={{
+                fontFamily: 'var(--font-accent)',
+                fontSize: '11px',
+                color: 'var(--accent)',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '12px',
+              }}
+            >
+              MCP Server
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
+              Tools: <code style={{ color: 'var(--ink-primary)' }}>moou_compile</code>,{' '}
+              <code style={{ color: 'var(--ink-primary)' }}>moou_score</code>,{' '}
+              <code style={{ color: 'var(--ink-primary)' }}>moou_deploy_prompt</code>. See{' '}
+              <a href="https://github.com/mojeebdev/moou/tree/main/mcp-server" style={{ color: 'var(--accent)' }}>
+                mcp-server/README.md
+              </a>{' '}
+              in the repo.
+            </p>
           </div>
         </div>
       </section>
@@ -313,6 +538,34 @@ export default function DocsPage() {
             style={{
               background: 'var(--accent-dim)',
               borderLeft: '3px solid var(--accent)',
+              borderRadius: 0,
+              padding: '24px 32px',
+              marginBottom: '24px',
+            }}
+          >
+            <p
+              style={{
+                fontFamily: 'var(--font-accent)',
+                fontSize: '11px',
+                color: 'var(--accent)',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                marginBottom: '12px',
+              }}
+            >
+              Rate Limits
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
+              <strong style={{ color: 'var(--ink-primary)' }}>30 requests per IP per hour</strong> on{' '}
+              <code>POST /compile</code> and <code>POST /score</code>. The website UI is unlimited. Each compile uses
+              ~2 Qwen calls (~3–5k tokens). <code>POST /deploy-prompt</code> is free.
+            </p>
+          </div>
+
+          <div
+            style={{
+              background: 'var(--void-02)',
+              border: '1px solid var(--void-05)',
               borderRadius: 0,
               padding: '24px 32px',
             }}
@@ -327,10 +580,14 @@ export default function DocsPage() {
                 marginBottom: '12px',
               }}
             >
-              ⚡ Rate Limits
+              Support
             </p>
-            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
-              10 requests per IP per hour during hackathon period. Limits may change post-hackathon.
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', lineHeight: 2 }}>
+              <a href="https://github.com/mojeebdev/moou/issues" style={{ color: 'var(--accent)' }}>GitHub Issues</a>
+              {' · '}
+              <a href="https://x.com/mojeebeth" style={{ color: 'var(--accent)' }}>@mojeebeth</a>
+              {' · '}
+              <a href="https://t.me/+o1tYqQ_lXxllYjgy" style={{ color: 'var(--accent)' }}>Bitget Hackathon Telegram</a>
             </p>
           </div>
         </div>

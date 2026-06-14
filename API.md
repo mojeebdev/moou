@@ -12,6 +12,7 @@ MÓOU (谋) exposes a public REST API that compiles plain-English trading ideas 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Getting Started](#getting-started)
 - [Authentication](#authentication)
 - [Rate Limits](#rate-limits)
 - [CORS](#cors)
@@ -43,6 +44,71 @@ All timestamps are ISO 8601 UTC strings. All successful `/compile` responses inc
 
 ---
 
+## Getting Started
+
+### Step 1 — Try the web app (fastest)
+
+Open [usemoou.xyz](https://usemoou.xyz), describe a strategy, and click **Compile Strategy**.  
+No API key. **No rate limit** on the website — only the public `/api/v1/*` routes are capped.
+
+### Step 2 — Verify the API is up
+
+```bash
+curl -s https://usemoou.xyz/api/v1/health | jq .
+```
+
+Expected: `"status": "operational"`
+
+### Step 3 — Discover valid inputs
+
+```bash
+curl -s https://usemoou.xyz/api/v1/markets | jq .
+```
+
+Use the **label** strings (not `id` values) in compile requests.
+
+### Step 4 — Your first compile
+
+```bash
+curl -X POST https://usemoou.xyz/api/v1/compile \
+  -H "Content-Type: application/json" \
+  -d '{
+    "strategy": "Buy BTC when RSI drops below 30 on the 4H chart",
+    "market": "Crypto Futures",
+    "timeframe": "Swing (1H-4H)",
+    "regime": "Ranging"
+  }'
+```
+
+Response includes `strategy_name`, structured entry/exit/sizing, `risk` scores, and `playbook_format`.
+
+### Step 5 — Integrate further
+
+| Goal | Next step |
+|------|-----------|
+| Agent integration | [MCP server](./mcp-server/README.md) — `moou_compile`, `moou_score`, `moou_deploy_prompt` |
+| Client codegen | `GET /api/v1/openapi` — OpenAPI 3.1 spec |
+| Risk-only calls | `POST /api/v1/score` — when you already have a structured spec |
+| Bitget Playbook | `POST /api/v1/deploy-prompt` or copy **getagent Deploy Prompt** from the web UI |
+| Any LLM assistant | Copy [INTEGRATION_PROMPT.md](./INTEGRATION_PROMPT.md) — drop into ChatGPT, Claude, Cursor, etc. |
+
+### LLM Integration Prompt
+
+Don't want to read every endpoint? Copy the master prompt from [INTEGRATION_PROMPT.md](./INTEGRATION_PROMPT.md) or [usemoou.xyz/docs#integration-prompt](https://usemoou.xyz/docs#integration-prompt).
+
+Paste it into any LLM, replace the last line with your goal (e.g. *"compile this funding-rate strategy and generate a Playbook deploy prompt"*), and the model will walk you through the API calls.
+
+### Support
+
+| Channel | Use for |
+|---------|---------|
+| [GitHub Issues](https://github.com/mojeebdev/moou/issues) | Bugs, API questions, integration help |
+| [@mojeebeth on X](https://x.com/mojeebeth) | Quick questions, hackathon updates |
+| [Bitget Hackathon Telegram](https://t.me/+o1tYqQ_lXxllYjgy) | Playbook keys, Qwen credits, hackathon support |
+| [usemoou.xyz/docs](https://usemoou.xyz/docs) | Interactive endpoint reference |
+
+---
+
 ## Authentication
 
 No API key is required during the Bitget AI Base Camp hackathon period.
@@ -57,13 +123,41 @@ Requests are identified by client IP for rate limiting. No `Authorization` heade
 
 | Limit | Value |
 |-------|-------|
-| Requests per IP | **10** |
+| Requests per IP | **30** (default; set `RATE_LIMIT_MAX` on server to adjust) |
 | Window | **1 hour** (rolling) |
-| Applies to | `POST /compile` |
+| Applies to | `POST /compile` and `POST /score` |
+| Not limited | Website UI (`/api/compile`, `/api/score`), `GET` endpoints, `POST /deploy-prompt` |
 
 When exceeded, the API returns **HTTP 429** with error code `RATE_LIMIT_EXCEEDED`.
 
-`GET` endpoints (`/health`, `/markets`, `/stats`) are not rate-limited.
+`GET` endpoints (`/health`, `/markets`, `/stats`, `/openapi`) are not rate-limited.
+
+### Why 30/hour?
+
+Protects Qwen API credits from abuse while keeping the API usable for real integration work. Most developers test with 5–15 calls, not hundreds.
+
+| Surface | Rate limited? |
+|---------|---------------|
+| Website (usemoou.xyz) | **No** — compile freely in the browser |
+| Public API (`/api/v1/compile`, `/api/v1/score`) | **Yes** — 30/hour per IP |
+| MCP tools (call public API) | **Yes** — same cap |
+
+Increase `RATE_LIMIT_MAX` on Vercel as usage grows and credits allow.
+
+### Estimated cost per compile
+
+Each `POST /compile` runs **two** Qwen3.6-plus calls (compile + score):
+
+| Call | Max output tokens |
+|------|-------------------|
+| Compile | 1,000 |
+| Score | 800 |
+
+Typical total: **~3,000–5,000 tokens** per full compile (input + output), depending on strategy length.
+
+With **$30 hackathon Qwen credits**, expect roughly **1,000–3,000** full public API compiles before credits run low — varies by strategy verbosity and actual token usage. Monitor via your Qwen / hackathon dashboard.
+
+`/score` alone uses one call (~800 max output tokens). `/deploy-prompt` uses **no** Qwen calls.
 
 ---
 
@@ -101,8 +195,9 @@ All API errors use a consistent envelope:
 |------|------|-------------|
 | `MISSING_FIELDS` | 400 | One or more required fields are missing or the request body is invalid JSON |
 | `INVALID_MARKET` | 400 | `market` is not a supported value |
-| `RATE_LIMIT_EXCEEDED` | 429 | More than 10 compile requests from this IP within the past hour |
+| `RATE_LIMIT_EXCEEDED` | 429 | More than the hourly cap from this IP on `/compile` or `/score` |
 | `COMPILATION_FAILED` | 500 | AI model failed to compile or score the strategy |
+| `SCORING_FAILED` | 500 | AI model failed to score the strategy |
 
 ---
 
@@ -289,6 +384,88 @@ Content-Type: application/json
 ```
 
 **Typical latency:** 1–5 seconds (two sequential Qwen calls: compile + score).
+
+---
+
+### POST /score
+
+Score risk for an existing structured strategy. Use when your agent already has a compiled spec and only needs the risk assessment primitive.
+
+**Request body**
+
+| Field | Type | Required |
+|-------|------|----------|
+| `strategy` | object | Yes — `strategy_name`, `entry_conditions`, `exit_conditions`, `position_sizing` |
+| `market` | string | Yes |
+| `timeframe` | string | Yes |
+
+**Response** `200 OK`
+
+```json
+{
+  "risk": { "overall_score": 55, "verdict": "MODERATE" },
+  "meta": {
+    "scored_at": "2026-06-14T08:00:00.000Z",
+    "model": "qwen3.6-plus",
+    "version": "1.0.0",
+    "processing_ms": 890,
+    "powered_by": "MÓOU 谋",
+    "docs": "https://usemoou.xyz/docs"
+  }
+}
+```
+
+Rate-limited: same cap as `/compile` (default **30/hour** per IP).
+
+---
+
+### POST /deploy-prompt
+
+Generate a getagent-ready prompt to upload, backtest, and publish a MÓOU-compiled strategy to Bitget Playbook.
+
+**Request body**
+
+| Field | Type | Required |
+|-------|------|----------|
+| `strategy` | object | Yes — full strategy including `playbook_format` |
+| `risk` | object | No — include for richer deploy prompt |
+| `playbook_key` | string | No — your Playbook API key, embedded in prompt, never stored |
+
+**Response** `200 OK`
+
+```json
+{
+  "prompt": "1. Install getagent using ...",
+  "getagent_skill": "https://www.npmjs.com/package/@bitget-ai/getagent-skill",
+  "playbook_explore": "https://www.bitget.com/activity/ai-get-agent/playbook?tab=explore",
+  "meta": { "generated_at": "...", "version": "1.0.0" }
+}
+```
+
+Not rate-limited.
+
+---
+
+### GET /openapi
+
+Machine-readable OpenAPI 3.1 specification for client generation and agent discovery.
+
+```http
+GET /api/v1/openapi HTTP/1.1
+Host: usemoou.xyz
+```
+
+---
+
+## MCP Server
+
+Cursor and Claude Code agents can call MÓOU via MCP. See [`mcp-server/README.md`](./mcp-server/README.md).
+
+| Tool | Description |
+|------|-------------|
+| `moou_compile` | NL → structured strategy + risk |
+| `moou_score` | Risk assessment for existing spec |
+| `moou_deploy_prompt` | getagent Playbook deploy prompt |
 
 ---
 

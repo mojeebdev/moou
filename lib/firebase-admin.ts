@@ -1,9 +1,7 @@
 import { createHash } from 'crypto'
 import { initializeApp, getApps, cert } from 'firebase-admin/app'
 import { FieldValue, getFirestore, type Firestore } from 'firebase-admin/firestore'
-
-const RATE_LIMIT_MAX = 10
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
+import { RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS } from '@/lib/api-constants'
 
 let firestore: Firestore | null = null
 

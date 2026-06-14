@@ -89,13 +89,13 @@ export default function Hero() {
           risk, and outputs Playbook-ready strategy.
         </p>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="hero-cta-group flex flex-col sm:flex-row sm:items-center gap-4">
           <a
             href="#compile"
-            className="inline-flex items-center justify-center no-underline transition-all duration-200 hover:-translate-y-0.5"
+            className="hero-cta hero-cta-primary inline-flex items-center justify-center no-underline transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5"
             style={{
               fontFamily: 'var(--font-accent)',
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: '13px',
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
@@ -110,19 +110,18 @@ export default function Hero() {
           </a>
           <a
             href="#how-it-works"
-            className="inline-flex items-center justify-center gap-2 no-underline transition-all duration-200 hover:border-[var(--accent)] hover:text-[var(--accent)] animate-bounce-hint"
+            className="hero-cta hero-cta-secondary inline-flex items-center justify-center gap-2 no-underline transition-all duration-200 hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--void-03)] animate-bounce-hint"
             style={{
               fontFamily: 'var(--font-accent)',
-              fontWeight: 400,
+              fontWeight: 600,
               fontSize: '12px',
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
               padding: '16px 28px',
               borderRadius: '8px',
-              border: '1px solid rgba(245, 166, 35, 0.35)',
-              background: 'rgba(5, 5, 8, 0.45)',
-              backdropFilter: 'blur(8px)',
-              color: 'rgba(240, 240, 248, 0.92)',
+              border: '1px solid var(--accent-border)',
+              background: 'var(--void-02)',
+              color: 'var(--ink-primary)',
             }}
           >
             ↓ See how it works
@@ -133,14 +132,19 @@ export default function Hero() {
           <p
             style={{
               fontFamily: 'var(--font-accent)',
-              fontSize: '11px',
-              color: 'var(--ink-tertiary)',
-              letterSpacing: '0.1em',
-              marginTop: '16px',
+              fontSize: '13px',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              marginTop: '20px',
               textTransform: 'uppercase',
+              color: 'var(--ink-primary)',
+              textShadow: '0 1px 12px rgba(0, 0, 0, 0.6)',
             }}
           >
-            {count.toLocaleString()} strategies compiled
+            <span style={{ color: 'var(--accent)', fontWeight: 700, fontSize: '15px' }}>
+              {count.toLocaleString()}
+            </span>{' '}
+            strategies compiled
           </p>
         )}
       </div>

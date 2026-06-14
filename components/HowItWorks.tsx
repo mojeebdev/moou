@@ -15,7 +15,7 @@ const STEPS = [
     num: '03',
     icon: '→',
     title: 'Deploy to Bitget',
-    body: "Copy the Playbook-ready output directly into Bitget's platform and start backtesting immediately.",
+    body: 'Copy for Playbook (quick) or use the getagent Deploy Prompt for the full upload → backtest → publish loop. See the User Guide.',
   },
 ]
 

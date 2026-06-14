@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ActionButton from '@/components/ActionButton'
 
 const API_ENDPOINT = 'https://usemoou.xyz/api/v1/compile'
 
@@ -67,8 +68,23 @@ export default function ApiAccessSection() {
             maxWidth: '640px',
           }}
         >
-          The MÓOU API is publicly accessible. Any developer can compile and score trading strategies
-          programmatically — no API key required.
+          Public API — no key required.{' '}
+          <a href="/docs" style={{ color: 'var(--accent)' }}>
+            Developer docs
+          </a>
+          {' · '}
+          <a href="/guide" style={{ color: 'var(--accent)' }}>
+            User guide
+          </a>
+          . Need help?{' '}
+          <a href="https://github.com/mojeebdev/moou/issues" style={{ color: 'var(--accent)' }}>
+            GitHub Issues
+          </a>{' '}
+          or{' '}
+          <a href="https://x.com/mojeebeth" style={{ color: 'var(--accent)' }}>
+            @mojeebeth
+          </a>
+          .
         </p>
 
         <pre
@@ -90,20 +106,15 @@ export default function ApiAccessSection() {
         </pre>
 
         <div className="flex flex-wrap gap-4">
-          <button
-            type="button"
-            onClick={copyEndpoint}
-            className="inline-flex items-center justify-center px-7 py-4 border border-[var(--void-05)] text-[var(--ink-secondary)] text-xs uppercase tracking-[0.08em] transition-colors hover:border-[var(--accent-border)] hover:text-[var(--ink-primary)]"
-            style={{ fontFamily: 'var(--font-accent)', borderRadius: 0, cursor: 'pointer', background: 'transparent' }}
-          >
+          <ActionButton variant="secondary" onClick={copyEndpoint}>
             {copied ? 'Copied ✓' : 'Copy Endpoint'}
-          </button>
+          </ActionButton>
           <a
             href="/docs"
-            className="inline-flex items-center justify-center px-7 py-4 border border-[var(--void-05)] text-[var(--ink-secondary)] text-xs uppercase tracking-[0.08em] no-underline transition-colors hover:border-[var(--accent-border)] hover:text-[var(--ink-primary)]"
-            style={{ fontFamily: 'var(--font-accent)', borderRadius: 0 }}
+            className="inline-flex items-center justify-center px-7 py-4 text-xs uppercase tracking-[0.08em] no-underline transition-all duration-200 bg-[var(--void-03)] text-[var(--ink-primary)] border border-[var(--void-05)] hover:border-[var(--accent-border)]"
+            style={{ fontFamily: 'var(--font-accent)', fontWeight: 600, borderRadius: 0 }}
           >
-            Full API Docs →
+            Developer Docs →
           </a>
         </div>
       </div>

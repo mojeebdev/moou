@@ -1,6 +1,22 @@
 export const API_VERSION = '1.0.0'
 export const DOCS_URL = 'https://usemoou.xyz/docs'
 
+/** Public API rate cap per IP per hour. Override with RATE_LIMIT_MAX env on Vercel. */
+export const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX ?? 30)
+
+export const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
+
+export function rateLimitMessage(): string {
+  return `${RATE_LIMIT_MAX} requests per hour per IP. Try again later.`
+}
+
+export const SUPPORT = {
+  github: 'https://github.com/mojeebdev/moou/issues',
+  x: 'https://x.com/mojeebeth',
+  telegram: 'https://t.me/+o1tYqQ_lXxllYjgy',
+  email: 'https://blindspotlab.xyz',
+} as const
+
 export const VALID_MARKETS = [
   'Crypto Futures',
   'Crypto Spot',

@@ -1,0 +1,26 @@
+{
+  "name": "@moou/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for MÓOU — compile and score trading strategies via AI agents",
+  "type": "module",
+  "bin": {
+    "moou-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.0",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -29,7 +29,22 @@ const FAQ_ITEMS = [
   {
     question: 'Can I deploy the compiled strategy directly?',
     answer:
-      "Yes. The Playbook Output section generates Bitget Playbook-ready text you can copy directly into Bitget's platform.",
+      'Yes. MÓOU gives you a pre-structured spec and a getagent deploy prompt. Paste that into Claude Code / Cursor with @bitget-ai/getagent-skill installed, add your own Playbook API key, and getagent handles upload, backtest, and publish on Bitget Playbook.',
+  },
+  {
+    question: 'Do I use your Playbook API key or mine?',
+    answer:
+      'Yours. Each developer gets a Playbook API key from Bitget Playbook → Create Agent. Pass it as playbook_key in POST /deploy-prompt or paste it into the copied getagent prompt. MÓOU does not store or share keys.',
+  },
+  {
+    question: 'Is there a rate limit on the API?',
+    answer:
+      'The public API (/api/v1/compile and /api/v1/score) is capped at 30 requests per IP per hour. The website UI has no rate limit — compile freely in the browser.',
+  },
+  {
+    question: 'Where do I get support?',
+    answer:
+      'Open a GitHub Issue on github.com/mojeebdev/moou, message @mojeebeth on X, or join the Bitget Hackathon Telegram community for Playbook keys and Qwen credits.',
   },
 ] as const
 

@@ -2,16 +2,16 @@
 
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { Risk, Strategy } from '@/lib/types'
+import ActionButton from '@/components/ActionButton'
+import { buildGetagentDeployPrompt } from '@/lib/getagent'
 import { getRegimeBadgeClass, getRiskColorHex } from '@/lib/risk'
 
 const DESKTOP_BG = '/images/middle-desktop.png'
 const MOBILE_BG = '/images/middle-mobile.png'
 
 const GLASS_PANEL: CSSProperties = {
-  background: 'rgba(5, 5, 8, 0.92)',
+  background: 'var(--void-02)',
   border: '1px solid var(--accent-border)',
-  backdropFilter: 'blur(8px)',
-  WebkitBackdropFilter: 'blur(8px)',
   borderRadius: 0,
   padding: '32px',
 }
@@ -34,6 +34,7 @@ const DIMENSIONS = [
 export default function OutputSection({ strategy, risk, isVisible, onSaveToVault }: OutputSectionProps) {
   const [barWidths, setBarWidths] = useState<Record<string, number>>({})
   const [copied, setCopied] = useState(false)
+  const [copiedDeploy, setCopiedDeploy] = useState(false)
   const [bgSrc, setBgSrc] = useState(DESKTOP_BG)
 
   useEffect(() => {
@@ -71,6 +72,13 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
     await navigator.clipboard.writeText(strategy.playbook_format)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const copyDeployPrompt = async () => {
+    if (!risk) return
+    await navigator.clipboard.writeText(buildGetagentDeployPrompt(strategy, risk))
+    setCopiedDeploy(true)
+    setTimeout(() => setCopiedDeploy(false), 2000)
   }
 
   const contentStyle: CSSProperties = {
@@ -379,21 +387,30 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
             {strategy.playbook_format}
           </div>
 
+          <p
+            style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '13px',
+              color: 'var(--ink-tertiary)',
+              marginBottom: '16px',
+              lineHeight: 1.6,
+            }}
+          >
+            <a href="/guide#playbook" style={{ color: 'var(--accent)' }}>
+              User Guide
+            </a>{' '}
+            explains both deploy paths.
+          </p>
           <div className="flex flex-wrap gap-4">
-            <button
-              onClick={copyPlaybook}
-              className="inline-flex items-center justify-center px-7 py-4 bg-[var(--accent)] text-black text-xs uppercase tracking-[0.1em] transition-all hover:opacity-88"
-              style={{ fontFamily: 'var(--font-accent)', fontWeight: 500, borderRadius: 0 }}
-            >
+            <ActionButton variant="primary" onClick={copyPlaybook}>
               {copied ? 'Copied ✓' : 'Copy for Bitget Playbook'}
-            </button>
-            <button
-              onClick={onSaveToVault}
-              className="inline-flex items-center justify-center px-7 py-4 border border-[var(--void-05)] text-[var(--ink-secondary)] text-xs uppercase tracking-[0.08em] transition-colors hover:border-[var(--accent-border)] hover:text-[var(--ink-primary)]"
-              style={{ fontFamily: 'var(--font-accent)', borderRadius: 0 }}
-            >
+            </ActionButton>
+            <ActionButton variant="secondary" onClick={copyDeployPrompt}>
+              {copiedDeploy ? 'Copied ✓' : 'Copy getagent Deploy Prompt'}
+            </ActionButton>
+            <ActionButton variant="ghost" onClick={onSaveToVault}>
               Save to Vault
-            </button>
+            </ActionButton>
           </div>
         </div>
       </div>

@@ -81,6 +81,16 @@ section {
   .chart-loading {
     height: 300px !important;
   }
+
+  .hero-cta-primary {
+    font-size: 11.7px !important;
+    padding: 16px 36px !important;
+  }
+
+  .hero-cta-secondary {
+    font-size: 10.8px !important;
+    padding: 14px 25px !important;
+  }
 }
 
 .section-inner {

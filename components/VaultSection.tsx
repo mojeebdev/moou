@@ -1,5 +1,7 @@
 'use client'
 
+import ActionButton from '@/components/ActionButton'
+
 import type { VaultEntry } from '@/lib/types'
 import { getRiskColorHex } from '@/lib/risk'
 
@@ -137,21 +139,14 @@ export default function VaultSection({ vault, onLoad }: VaultSectionProps) {
                     {entry.timestamp}
                   </p>
 
-                  <button
-                    type="button"
+                  <ActionButton
+                    variant="secondary"
                     onClick={() => onLoad(entry.id)}
-                    className="vault-load-btn w-full rounded-lg border border-[var(--accent-border)] bg-[var(--accent-dim)] text-[var(--accent)] uppercase transition-all duration-200 hover:bg-[var(--accent)] hover:text-black"
-                    style={{
-                      marginTop: '20px',
-                      height: '40px',
-                      fontFamily: 'var(--font-accent)',
-                      fontSize: '11px',
-                      letterSpacing: '0.1em',
-                      cursor: 'pointer',
-                    }}
+                    className="w-full"
+                    style={{ marginTop: '20px', height: '40px', padding: '0 16px', fontSize: '11px' }}
                   >
                     Load
-                  </button>
+                  </ActionButton>
                 </article>
               )
             })}
