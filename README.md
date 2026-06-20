@@ -18,7 +18,7 @@ MÓOU takes any trading idea in plain English and outputs:
 
 1. **Structured strategy spec** — entry, exit, position sizing, market regime
 2. **Risk score (0–100)** — five dimensions with plain-English breakdown
-3. **Bitget Playbook-ready output** — copy directly into Playbook or hand off via getagent deploy prompt
+3. **Bitget Playbook-ready output** — copy into Playbook, deploy via getagent, or paper-trade on GetAgent Studio
 
 The web app includes a live TradingView chart (search any Bitget-listed asset), a local strategy vault (localStorage, max 10 entries), and dedicated pages for users ([Guide](https://usemoou.xyz/guide)), developers ([Docs](https://usemoou.xyz/docs)), and [About](https://usemoou.xyz/about).
 
@@ -28,9 +28,10 @@ No code required. Unlimited compiles on the website.
 
 1. Go to [usemoou.xyz](https://usemoou.xyz) → **Compile** — describe your strategy, pick market/timeframe/regime
 2. Review the structured spec and risk score
-3. Deploy to Bitget Playbook:
+3. Deploy and validate:
    - **Path A** — *Copy for Bitget Playbook* (`playbook_format` text for manual paste)
-   - **Path B** — *Copy getagent Deploy Prompt* (full upload → backtest → publish loop with `@bitget-ai/getagent-skill`)
+   - **Path B** — *Copy getagent Deploy Prompt* (upload → backtest → publish with `@bitget-ai/getagent-skill`)
+   - **Path C** — *GetAgent Studio* ([getagent.studio](https://getagent.studio/)) — free paper trading + performance metrics for hackathon demos
 
 Full walkthrough: [User Guide](https://usemoou.xyz/guide)
 
@@ -71,7 +72,7 @@ Rate cap:  30 POST requests per IP per hour (/compile and /score)
 | `GET` | `/openapi` | OpenAPI 3.1 machine-readable spec |
 | `POST` | `/compile` | Compile + risk score (single call) |
 | `POST` | `/score` | Risk score for existing strategy spec |
-| `POST` | `/deploy-prompt` | getagent Playbook deploy prompt |
+| `POST` | `/deploy-prompt` | getagent + GetAgent Studio deploy prompts (`prompt`, `studio_prompt`) |
 
 **Full reference:** [API.md](./API.md) (schemas, error codes, examples in cURL / JS / Python)  
 **Interactive docs:** [usemoou.xyz/docs](https://usemoou.xyz/docs)
@@ -160,7 +161,7 @@ app/
       openapi/route.ts     # GET  — OpenAPI 3.1 spec
       compile/route.ts     # POST — public compile + score
       score/route.ts       # POST — risk score only
-      deploy-prompt/route.ts # POST — getagent deploy prompt
+      deploy-prompt/route.ts # POST — getagent + Studio deploy prompts
 components/                # UI sections
 lib/                       # moou-engine, API helpers, OpenAPI, nav config
 mcp-server/                # MCP tools for agent IDEs (Cursor, Grok Build, etc.)

@@ -3,7 +3,12 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { Risk, Strategy } from '@/lib/types'
 import ActionButton from '@/components/ActionButton'
-import { buildGetagentDeployPrompt } from '@/lib/getagent'
+import WorkflowPnlCard from '@/components/WorkflowPnlCard'
+import {
+  GETAGENT_STUDIO_URL,
+  buildGetagentDeployPrompt,
+  buildStudioPaperTradePrompt,
+} from '@/lib/getagent'
 import { getRegimeBadgeClass, getRiskColorHex } from '@/lib/risk'
 
 const DESKTOP_BG = '/images/middle-desktop.png'
@@ -31,10 +36,106 @@ const DIMENSIONS = [
   { key: 'execution_complexity', noteKey: 'execution_note', label: 'Execution Complexity' },
 ] as const
 
-export default function OutputSection({ strategy, risk, isVisible, onSaveToVault }: OutputSectionProps) {
+function AnimatedRiskBars({ risk }: { risk: Risk }) {
   const [barWidths, setBarWidths] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    const timers = DIMENSIONS.map((dim, i) =>
+      setTimeout(() => {
+        setBarWidths((prev) => ({
+          ...prev,
+          [dim.key]: risk[dim.key as keyof Risk] as number,
+        }))
+      }, i * 120)
+    )
+
+    return () => timers.forEach(clearTimeout)
+  }, [risk])
+
+  return (
+    <>
+      {DIMENSIONS.map((dim, i) => {
+        const score = risk[dim.key as keyof Risk] as number
+        const note = risk[dim.noteKey as keyof Risk] as string
+        const fillColor = getRiskColorHex(score)
+        return (
+          <div
+            key={dim.key}
+            style={{
+              position: 'relative',
+              zIndex: 2,
+              marginBottom: '24px',
+            }}
+          >
+            <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
+              <span
+                style={{
+                  color: '#F0F0F8',
+                  fontFamily: 'var(--font-accent)',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {dim.label}
+              </span>
+              <span
+                style={{
+                  color: 'var(--accent)',
+                  fontFamily: 'var(--font-accent)',
+                  fontWeight: 600,
+                  fontSize: '13px',
+                }}
+              >
+                {score}
+              </span>
+            </div>
+            <div
+              style={{
+                height: '6px',
+                background: 'var(--void-05)',
+                borderRadius: 0,
+                overflow: 'hidden',
+              }}
+            >
+              <div
+                style={{
+                  height: '6px',
+                  borderRadius: 0,
+                  width: `${barWidths[dim.key] ?? 0}%`,
+                  background: fillColor,
+                  transition: 'width 800ms ease-out',
+                  transitionDelay: `${i * 120}ms`,
+                }}
+              />
+            </div>
+            <p
+              style={{
+                color: 'var(--ink-secondary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: '13px',
+                fontStyle: 'italic',
+                marginTop: '6px',
+                lineHeight: 1.6,
+                marginBottom: 0,
+              }}
+            >
+              {note}
+            </p>
+          </div>
+        )
+      })}
+    </>
+  )
+}
+
+export default function OutputSection({ strategy, risk, isVisible, onSaveToVault }: OutputSectionProps) {
   const [copied, setCopied] = useState(false)
   const [copiedDeploy, setCopiedDeploy] = useState(false)
+  const [copiedStudio, setCopiedStudio] = useState(false)
+  const [playbookKey, setPlaybookKey] = useState('')
+  const [copyError, setCopyError] = useState('')
   const [bgSrc, setBgSrc] = useState(DESKTOP_BG)
 
   useEffect(() => {
@@ -50,35 +151,46 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
     return () => window.removeEventListener('resize', updateBg)
   }, [])
 
-  useEffect(() => {
-    if (!isVisible || !risk) return
-
-    setBarWidths({})
-    const timers = DIMENSIONS.map((dim, i) =>
-      setTimeout(() => {
-        setBarWidths((prev) => ({
-          ...prev,
-          [dim.key]: risk[dim.key as keyof Risk] as number,
-        }))
-      }, i * 120)
-    )
-
-    return () => timers.forEach(clearTimeout)
-  }, [isVisible, risk])
-
   if (!isVisible || !strategy || !risk) return null
 
+  const writeClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopyError('')
+      return true
+    } catch {
+      setCopyError('Copy failed — select the text and copy manually.')
+      return false
+    }
+  }
+
   const copyPlaybook = async () => {
-    await navigator.clipboard.writeText(strategy.playbook_format)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    if (await writeClipboard(strategy.playbook_format)) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   const copyDeployPrompt = async () => {
     if (!risk) return
-    await navigator.clipboard.writeText(buildGetagentDeployPrompt(strategy, risk))
-    setCopiedDeploy(true)
-    setTimeout(() => setCopiedDeploy(false), 2000)
+    if (
+      await writeClipboard(
+        buildGetagentDeployPrompt(strategy, risk, {
+          playbookKey: playbookKey.trim() || undefined,
+        })
+      )
+    ) {
+      setCopiedDeploy(true)
+      setTimeout(() => setCopiedDeploy(false), 2000)
+    }
+  }
+
+  const copyStudioPrompt = async () => {
+    if (!risk) return
+    if (await writeClipboard(buildStudioPaperTradePrompt(strategy, risk))) {
+      setCopiedStudio(true)
+      setTimeout(() => setCopiedStudio(false), 2000)
+    }
   }
 
   const contentStyle: CSSProperties = {
@@ -268,83 +380,20 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
                 </span>
               </div>
 
-              <div>
-                {DIMENSIONS.map((dim) => {
-                  const score = risk[dim.key as keyof Risk] as number
-                  const note = risk[dim.noteKey as keyof Risk] as string
-                  const fillColor = getRiskColorHex(score)
-                  return (
-                    <div
-                      key={dim.key}
-                      style={{
-                        position: 'relative',
-                        zIndex: 2,
-                        marginBottom: '24px',
-                      }}
-                    >
-                      <div className="flex justify-between items-center" style={{ marginBottom: '8px' }}>
-                        <span
-                          style={{
-                            color: '#F0F0F8',
-                            fontFamily: 'var(--font-accent)',
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            letterSpacing: '0.12em',
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          {dim.label}
-                        </span>
-                        <span
-                          style={{
-                            color: 'var(--accent)',
-                            fontFamily: 'var(--font-accent)',
-                            fontWeight: 600,
-                            fontSize: '13px',
-                          }}
-                        >
-                          {score}
-                        </span>
-                      </div>
-                      <div
-                        style={{
-                          height: '6px',
-                          background: 'var(--void-05)',
-                          borderRadius: 0,
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '6px',
-                            borderRadius: 0,
-                            width: `${barWidths[dim.key] ?? 0}%`,
-                            background: fillColor,
-                            transition: 'width 800ms ease-out',
-                          }}
-                        />
-                      </div>
-                      <p
-                        style={{
-                          color: 'var(--ink-secondary)',
-                          fontFamily: 'var(--font-body)',
-                          fontSize: '13px',
-                          fontStyle: 'italic',
-                          marginTop: '6px',
-                          lineHeight: 1.6,
-                          marginBottom: 0,
-                        }}
-                      >
-                        {note}
-                      </p>
-                    </div>
-                  )
-                })}
-              </div>
+              <AnimatedRiskBars
+                key={`${strategy.strategy_name}-${risk.overall_score}`}
+                risk={risk}
+              />
             </div>
         </div>
 
         <div className="border-t border-[var(--void-05)]" style={{ marginTop: '64px', paddingTop: '60px' }}>
+          <WorkflowPnlCard
+            key={`${strategy.strategy_name}-${risk.overall_score}`}
+            strategy={strategy}
+            risk={risk}
+          />
+
           <span
             style={{
               display: 'block',
@@ -399,18 +448,98 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
             <a href="/guide#playbook" style={{ color: 'var(--accent)' }}>
               User Guide
             </a>{' '}
-            explains both deploy paths.
+            explains all three deploy paths.
           </p>
-          <div className="flex flex-wrap gap-4">
-            <ActionButton variant="primary" onClick={copyPlaybook}>
-              {copied ? 'Copied ✓' : 'Copy for Bitget Playbook'}
-            </ActionButton>
-            <ActionButton variant="secondary" onClick={copyDeployPrompt}>
-              {copiedDeploy ? 'Copied ✓' : 'Copy getagent Deploy Prompt'}
-            </ActionButton>
-            <ActionButton variant="ghost" onClick={onSaveToVault}>
-              Save to Vault
-            </ActionButton>
+          {copyError && (
+            <p
+              style={{
+                fontFamily: 'var(--font-accent)',
+                fontSize: '12px',
+                color: 'var(--risk-extreme)',
+                marginBottom: '16px',
+              }}
+            >
+              {copyError}
+            </p>
+          )}
+          <div
+            style={{
+              ...GLASS_PANEL,
+              marginBottom: '24px',
+              borderLeft: '3px solid var(--risk-low)',
+            }}
+          >
+            <span
+              style={{
+                display: 'block',
+                color: 'var(--risk-low)',
+                fontFamily: 'var(--font-accent)',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.14em',
+                marginBottom: '12px',
+                textTransform: 'uppercase',
+              }}
+            >
+              Path C — Paper trade on GetAgent Studio (recommended for demo)
+            </span>
+            <p
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '15px',
+                color: 'var(--ink-secondary)',
+                lineHeight: 1.8,
+                marginBottom: '16px',
+              }}
+            >
+              <a href={GETAGENT_STUDIO_URL} style={{ color: 'var(--accent)' }} target="_blank" rel="noopener noreferrer">
+                GetAgent Studio
+              </a>{' '}
+              is free — sign in with your Bitget account. Backtest and paper-trade your MÓOU strategy,
+              then share the public Studio link and performance metrics in your hackathon submission.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <ActionButton
+                variant="primary"
+                onClick={() => window.open(GETAGENT_STUDIO_URL, '_blank', 'noopener,noreferrer')}
+              >
+                Open GetAgent Studio →
+              </ActionButton>
+              <ActionButton variant="secondary" onClick={copyStudioPrompt}>
+                {copiedStudio ? 'Copied ✓' : 'Copy Studio Paper-Trade Prompt'}
+              </ActionButton>
+            </div>
+          </div>
+
+          <div style={{ ...GLASS_PANEL, marginBottom: '24px' }}>
+            <label
+              htmlFor="playbook-key"
+              className="block text-[10px] uppercase tracking-[0.1em] text-[var(--ink-tertiary)] mb-2"
+              style={{ fontFamily: 'var(--font-accent)' }}
+            >
+              Playbook API key (optional — Path B)
+            </label>
+            <input
+              id="playbook-key"
+              type="password"
+              value={playbookKey}
+              onChange={(e) => setPlaybookKey(e.target.value)}
+              placeholder="Paste your Playbook key — embedded in deploy prompt only, never stored"
+              autoComplete="off"
+              className="w-full border border-[var(--void-05)] bg-[var(--void-03)] px-4 py-3 text-[13px] text-[var(--ink-primary)] outline-none focus:border-[var(--accent-border)]"
+              style={{ fontFamily: 'var(--font-accent)', borderRadius: 0, marginBottom: '16px' }}
+            />
+            <div className="flex flex-wrap gap-4">
+              <ActionButton variant="primary" onClick={copyPlaybook}>
+                {copied ? 'Copied ✓' : 'Copy for Bitget Playbook'}
+              </ActionButton>
+              <ActionButton variant="secondary" onClick={copyDeployPrompt}>
+                {copiedDeploy ? 'Copied ✓' : 'Copy getagent Deploy Prompt'}
+              </ActionButton>
+              <ActionButton variant="ghost" onClick={onSaveToVault}>
+                Save to Vault
+              </ActionButton>
+            </div>
           </div>
         </div>
       </div>

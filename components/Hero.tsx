@@ -65,7 +65,6 @@ export default function Hero() {
         style={{ opacity: videoReady ? 0 : 1 }}
       >
         <source media="(max-width: 768px)" srcSet={MOBILE_POSTER} />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={DESKTOP_POSTER}
           alt=""

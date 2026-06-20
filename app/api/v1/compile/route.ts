@@ -63,11 +63,7 @@ export async function POST(req: NextRequest) {
 
   const risk = await scoreStrategy(compiled, market, timeframe)
   if (!risk) {
-    return errorResponse(
-      'COMPILATION_FAILED',
-      'Strategy compilation failed. Please try again.',
-      500
-    )
+    return errorResponse('SCORING_FAILED', 'Risk scoring failed. Please try again.', 500)
   }
 
   const processingMs = Date.now() - startTime

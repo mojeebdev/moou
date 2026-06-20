@@ -34,8 +34,12 @@ server.tool(
   {
     strategy: z.string().min(20).describe('Trading idea in plain English'),
     market: z.enum(MARKETS).describe('Target market'),
-    timeframe: z.string().describe('e.g. Swing (1H-4H), Scalp (<15M), Position (1D+)'),
-    regime: z.string().describe('e.g. Trending, Ranging, Neutral'),
+    timeframe: z
+      .string()
+      .describe('e.g. Swing (1H–4H), Scalp (1–15m), Position (Daily+)'),
+    regime: z
+      .string()
+      .describe('e.g. Trending Up, Trending Down, Ranging, Unclear'),
   },
   async ({ strategy, market, timeframe, regime }) => {
     const result = await apiPost('/compile', {
@@ -81,7 +85,7 @@ server.tool(
 
 server.tool(
   'moou_deploy_prompt',
-  'Generate a getagent-ready prompt to upload, backtest, and publish a MÓOU-compiled strategy to Bitget Playbook.',
+  'Generate getagent and GetAgent Studio prompts to deploy a MÓOU-compiled strategy to Bitget Playbook.',
   {
     strategy_name: z.string(),
     entry_conditions: z.string(),
@@ -92,21 +96,65 @@ server.tool(
     regime_description: z.string().optional(),
     overall_score: z.number().optional(),
     verdict: z.string().optional(),
+    volatility_exposure: z.number().optional(),
+    volatility_note: z.string().optional(),
+    drawdown_risk: z.number().optional(),
+    drawdown_note: z.string().optional(),
+    leverage_sensitivity: z.number().optional(),
+    leverage_note: z.string().optional(),
+    regime_dependency: z.number().optional(),
+    regime_note: z.string().optional(),
+    execution_complexity: z.number().optional(),
+    execution_note: z.string().optional(),
+    playbook_key: z.string().optional(),
   },
   async (args) => {
-    const { overall_score, verdict, ...strategy } = args
-    const risk =
-      overall_score !== undefined && verdict
-        ? { overall_score, verdict }
-        : undefined
+    const { playbook_key, ...fields } = args
+    const strategy = {
+      strategy_name: fields.strategy_name,
+      entry_conditions: fields.entry_conditions,
+      exit_conditions: fields.exit_conditions,
+      position_sizing: fields.position_sizing,
+      playbook_format: fields.playbook_format,
+      market_regime: fields.market_regime ?? '',
+      regime_description: fields.regime_description ?? '',
+    }
 
-    const result = await apiPost<{ prompt: string }>('/deploy-prompt', {
+    const riskEntries = [
+      ['overall_score', fields.overall_score],
+      ['verdict', fields.verdict],
+      ['volatility_exposure', fields.volatility_exposure],
+      ['volatility_note', fields.volatility_note],
+      ['drawdown_risk', fields.drawdown_risk],
+      ['drawdown_note', fields.drawdown_note],
+      ['leverage_sensitivity', fields.leverage_sensitivity],
+      ['leverage_note', fields.leverage_note],
+      ['regime_dependency', fields.regime_dependency],
+      ['regime_note', fields.regime_note],
+      ['execution_complexity', fields.execution_complexity],
+      ['execution_note', fields.execution_note],
+    ] as const
+
+    const risk = Object.fromEntries(
+      riskEntries.filter(([, value]) => value !== undefined)
+    )
+
+    const riskPayload = Object.keys(risk).length > 0 ? risk : undefined
+
+    const result = await apiPost<{
+      prompt: string
+      studio_prompt: string
+      getagent_skill: string
+      getagent_studio: string
+      playbook_explore: string
+    }>('/deploy-prompt', {
       strategy,
-      risk,
+      risk: riskPayload,
+      playbook_key,
     })
 
     return {
-      content: [{ type: 'text', text: result.prompt }],
+      content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
     }
   }
 )

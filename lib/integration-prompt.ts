@@ -32,7 +32,7 @@ Help me compile trading ideas into structured strategy specs with risk scores, t
    }
 4. Response includes: strategy_name, entry_conditions, exit_conditions, position_sizing, market_regime, playbook_format, risk (5 dimensions + verdict), meta
 5. Optional — score only: POST /score with existing strategy object + market + timeframe
-6. Optional — Playbook deploy: POST /deploy-prompt with strategy + risk → returns getagent prompt for @bitget-ai/getagent-skill
+6. Optional — Playbook deploy: POST /deploy-prompt with strategy + risk → returns prompt, studio_prompt, getagent_studio URL
 
 ## MCP (agent IDEs)
 
@@ -42,10 +42,18 @@ Setup: https://github.com/mojeebdev/moou/tree/main/mcp-server
 
 ## Bitget Playbook deploy (after compile)
 
+Path A — Quick: copy playbook_format from compile response into Bitget Playbook UI
+
+Path B — Coding agent:
 1. User obtains Playbook API Key from Bitget Playbook → Create Agent
 2. Install: npm package @bitget-ai/getagent-skill
 3. Use the deploy prompt from /deploy-prompt or MÓOU web UI "Copy getagent Deploy Prompt"
 4. getagent uploads, backtests, and publishes to Playbook explore
+
+Path C — GetAgent Studio (paper trading, best for hackathon demos):
+1. Open https://getagent.studio/ — free, sign in with Bitget account
+2. Use studio_prompt from POST /deploy-prompt or MÓOU "Copy Studio Paper-Trade Prompt"
+3. Run backtest + paper trading → submit public Studio strategy link + performance metrics
 
 ## Error handling
 

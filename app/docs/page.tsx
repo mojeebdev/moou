@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -219,7 +220,7 @@ export default function DocsPage() {
             }}
           >
             <li>
-              Try the <a href="/#compile" style={{ color: 'var(--accent)' }}>web app</a> — no API key, no rate limit
+              Try the <Link href="/#compile" style={{ color: 'var(--accent)' }}>web app</Link> — no API key, no rate limit
             </li>
             <li>
               <code style={{ color: 'var(--ink-primary)' }}>GET /health</code> — confirm the API is operational
@@ -484,14 +485,20 @@ export default function DocsPage() {
               /deploy-prompt — Playbook Bridge
             </p>
             <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', marginBottom: '16px', lineHeight: 1.8 }}>
-              Closes the loop from MÓOU compile → Bitget Playbook. Returns a getagent-ready prompt.
-              Pass your own <code style={{ color: 'var(--ink-primary)' }}>playbook_key</code> (from Playbook →
-              Create Agent) to embed it in the prompt — never stored on our servers. Not rate-limited.
+              Closes the loop from MÓOU compile → Bitget Playbook. Returns{' '}
+              <code style={{ color: 'var(--ink-primary)' }}>prompt</code> (getagent skill, Path B) and{' '}
+              <code style={{ color: 'var(--ink-primary)' }}>studio_prompt</code> (GetAgent Studio paper trading,
+              Path C — free at getagent.studio). Pass your own{' '}
+              <code style={{ color: 'var(--ink-primary)' }}>playbook_key</code> to embed in the getagent prompt —
+              never stored. Not rate-limited.
             </p>
-            <pre style={codeBlockStyle}>{`{
-  "strategy": { "...compiled fields...", "playbook_format": "..." },
-  "risk": { "...optional risk object..." },
-  "playbook_key": "your-playbook-api-key"
+            <pre style={codeBlockStyle}>{`// Response includes:
+{
+  "prompt": "...",
+  "studio_prompt": "...",
+  "getagent_studio": "https://getagent.studio/",
+  "getagent_skill": "https://www.npmjs.com/package/@bitget-ai/getagent-skill",
+  "playbook_explore": "https://www.bitget.com/activity/ai-get-agent/playbook?tab=explore"
 }`}</pre>
           </div>
 

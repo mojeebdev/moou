@@ -139,8 +139,8 @@ export default function AboutPage() {
                   marginBottom: '16px',
                 }}
               >
-                Describe your idea on the web app, review the risk breakdown, then deploy via Playbook copy
-                or the getagent loop. No code. Unlimited compiles on the website.
+                Describe your idea on the web app, review the risk breakdown, then paper-trade on GetAgent
+                Studio (free) or deploy via Playbook copy / getagent. No code. Unlimited compiles on the website.
               </p>
               <Link href="/guide" style={{ color: 'var(--accent)', fontFamily: 'var(--font-accent)', fontSize: '13px' }}>
                 Read the User Guide →

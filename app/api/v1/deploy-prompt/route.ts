@@ -2,7 +2,13 @@ import { NextRequest } from 'next/server'
 import type { Risk, Strategy } from '@/lib/types'
 import { API_VERSION, DOCS_URL } from '@/lib/api-constants'
 import { corsOptions, errorResponse, jsonResponse } from '@/lib/api-helpers'
-import { buildGetagentDeployPrompt } from '@/lib/getagent'
+import {
+  GETAGENT_SKILL_URL,
+  GETAGENT_STUDIO_URL,
+  PLAYBOOK_EXPLORE_URL,
+  buildGetagentDeployPrompt,
+  buildStudioPaperTradePrompt,
+} from '@/lib/getagent'
 
 export async function OPTIONS() {
   return corsOptions()
@@ -45,8 +51,10 @@ export async function POST(req: NextRequest) {
   return jsonResponse(
     {
       prompt,
-      getagent_skill: 'https://www.npmjs.com/package/@bitget-ai/getagent-skill',
-      playbook_explore: 'https://www.bitget.com/activity/ai-get-agent/playbook?tab=explore',
+      studio_prompt: buildStudioPaperTradePrompt(strategy as Strategy, risk),
+      getagent_skill: GETAGENT_SKILL_URL,
+      getagent_studio: GETAGENT_STUDIO_URL,
+      playbook_explore: PLAYBOOK_EXPLORE_URL,
       meta: {
         generated_at: new Date().toISOString(),
         version: API_VERSION,

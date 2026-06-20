@@ -29,7 +29,12 @@ const FAQ_ITEMS = [
   {
     question: 'Can I deploy the compiled strategy directly?',
     answer:
-      'Yes. MÓOU gives you a pre-structured spec and a getagent deploy prompt. Paste that into Claude Code, Cursor, Grok Build, or Codex with @bitget-ai/getagent-skill installed, add your own Playbook API key, and getagent handles upload, backtest, and publish on Bitget Playbook.',
+      'Yes. Three paths: (A) copy playbook_format into Bitget Playbook, (B) paste the getagent deploy prompt into Claude Code, Cursor, or Codex with @bitget-ai/getagent-skill, or (C) paper-trade on GetAgent Studio (getagent.studio) for backtest and performance data — great for hackathon demos.',
+  },
+  {
+    question: 'What is GetAgent Studio?',
+    answer:
+      'GetAgent Studio (getagent.studio) is Bitget\'s free web UI for building, backtesting, and paper-trading Playbook strategies — no coding agent required. After compiling on MÓOU, sign in with your Bitget account, create your strategy, run paper trading, and submit your public Studio strategy link with performance metrics.',
   },
   {
     question: 'Do I use your Playbook API key or mine?',

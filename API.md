@@ -89,7 +89,7 @@ Response includes `strategy_name`, structured entry/exit/sizing, `risk` scores, 
 | Agent integration | [MCP server](./mcp-server/README.md) — `moou_compile`, `moou_score`, `moou_deploy_prompt` |
 | Client codegen | `GET /api/v1/openapi` — OpenAPI 3.1 spec |
 | Risk-only calls | `POST /api/v1/score` — when you already have a structured spec |
-| Bitget Playbook | `POST /api/v1/deploy-prompt` or copy **getagent Deploy Prompt** from the web UI |
+| Bitget Playbook / Studio | `POST /api/v1/deploy-prompt` or copy deploy prompts from the web UI (getagent + GetAgent Studio) |
 | Any LLM assistant | Copy [INTEGRATION_PROMPT.md](./INTEGRATION_PROMPT.md) — ChatGPT, Claude, Grok, Codex, Gemini, etc. |
 
 ### LLM Integration Prompt
@@ -437,11 +437,19 @@ Generate a getagent-ready prompt to upload, backtest, and publish a MÓOU-compil
 ```json
 {
   "prompt": "1. Install getagent using ...",
+  "studio_prompt": "Paper-trade this MÓOU-compiled strategy on GetAgent Studio ...",
   "getagent_skill": "https://www.npmjs.com/package/@bitget-ai/getagent-skill",
+  "getagent_studio": "https://getagent.studio/",
   "playbook_explore": "https://www.bitget.com/activity/ai-get-agent/playbook?tab=explore",
   "meta": { "generated_at": "...", "version": "1.0.0" }
 }
 ```
+
+| Field | Description |
+|-------|-------------|
+| `prompt` | getagent skill deploy prompt (Path B — coding agent) |
+| `studio_prompt` | GetAgent Studio paper-trade prompt (Path C — free web UI) |
+| `getagent_studio` | GetAgent Studio URL — free, sign in with Bitget account |
 
 Not rate-limited.
 
@@ -468,7 +476,7 @@ For **Codex**, **ChatGPT**, **Gemini**, and other chat LLMs without MCP, use the
 |------|-------------|
 | `moou_compile` | NL → structured strategy + risk |
 | `moou_score` | Risk assessment for existing spec |
-| `moou_deploy_prompt` | getagent Playbook deploy prompt |
+| `moou_deploy_prompt` | getagent + GetAgent Studio deploy prompts (`prompt`, `studio_prompt`) |
 
 ---
 

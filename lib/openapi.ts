@@ -111,7 +111,14 @@ export function getOpenApiSpec(baseUrl = 'https://usemoou.xyz/api/v1') {
             },
           },
           responses: {
-            '200': { description: 'getagent-ready deploy prompt' },
+            '200': {
+              description: 'getagent and GetAgent Studio deploy prompts',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/DeployPromptResponse' },
+                },
+              },
+            },
             '400': { description: 'Validation error' },
           },
         },
@@ -145,6 +152,20 @@ export function getOpenApiSpec(baseUrl = 'https://usemoou.xyz/api/v1') {
               required: ['playbook_format'],
             },
           ],
+        },
+        DeployPromptResponse: {
+          type: 'object',
+          properties: {
+            prompt: { type: 'string', description: 'getagent skill deploy prompt (Path B)' },
+            studio_prompt: {
+              type: 'string',
+              description: 'GetAgent Studio paper-trade prompt (Path C)',
+            },
+            getagent_skill: { type: 'string', format: 'uri' },
+            getagent_studio: { type: 'string', format: 'uri' },
+            playbook_explore: { type: 'string', format: 'uri' },
+            meta: { type: 'object' },
+          },
         },
         Risk: {
           type: 'object',

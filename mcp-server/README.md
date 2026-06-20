@@ -10,7 +10,7 @@ MCP server that exposes MÓOU compile, score, and Playbook deploy tools to agent
 |------|-------------|
 | `moou_compile` | NL idea → structured strategy + risk + Playbook format |
 | `moou_score` | Risk assessment for an existing strategy spec |
-| `moou_deploy_prompt` | getagent-ready prompt for Bitget Playbook upload/backtest/publish |
+| `moou_deploy_prompt` | getagent + GetAgent Studio prompts (`prompt`, `studio_prompt`) for Playbook deploy and paper trading |
 
 ## Install
 

@@ -100,8 +100,8 @@ export default function GuidePage() {
                 (volatility, drawdown, leverage, regime dependency, execution complexity) with notes.
               </li>
               <li>
-                <strong style={{ color: 'var(--ink-primary)' }}>Playbook-ready output</strong> — copy directly into
-                Bitget Playbook or hand off to an agent via the deploy prompt.
+                <strong style={{ color: 'var(--ink-primary)' }}>Playbook-ready output</strong> — copy into Bitget
+                Playbook, deploy via getagent, or paper-trade free on GetAgent Studio.
               </li>
               <li>
                 <strong style={{ color: 'var(--ink-primary)' }}>Strategy Vault</strong> — save up to 10 compiles in
@@ -172,7 +172,7 @@ export default function GuidePage() {
         </div>
       </section>
 
-      {/* Two paths */}
+      {/* Three paths */}
       <section id="playbook" style={{ padding: '0 clamp(24px, 6vw, 80px) 80px', background: 'var(--void-01)' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
           <h2
@@ -195,7 +195,7 @@ export default function GuidePage() {
               marginBottom: '32px',
             }}
           >
-            Two paths. Pick based on how you work with Bitget Agent.
+            Three paths. Path C is best for hackathon demos with paper-trading proof.
           </p>
 
           <div style={{ ...cardStyle, borderLeft: '3px solid var(--accent)' }}>
@@ -222,7 +222,36 @@ export default function GuidePage() {
           </div>
 
           <div style={{ ...cardStyle, borderLeft: '3px solid var(--risk-low)' }}>
-            <p style={stepNumStyle}>Path B — Full Playbook loop (recommended)</p>
+            <p style={stepNumStyle}>Path C — Paper trade on GetAgent Studio (best for demo video)</p>
+            <h3
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                fontSize: '22px',
+                color: 'var(--ink-primary)',
+                marginBottom: '12px',
+              }}
+            >
+              Validate with paper trading
+            </h3>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '15px', color: 'var(--ink-secondary)', lineHeight: 1.8 }}>
+              After compile, use <strong style={{ color: 'var(--ink-primary)' }}>Open GetAgent Studio</strong> or{' '}
+              <strong style={{ color: 'var(--ink-primary)' }}>Copy Studio Paper-Trade Prompt</strong>. GetAgent Studio
+              is Bitget&apos;s web UI for backtest and paper trading — no coding agent needed. Run your MÓOU strategy,
+              capture PnL / drawdown / Sharpe / win rate, and submit your public Studio strategy link with your
+              hackathon materials.
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--ink-tertiary)', lineHeight: 1.7, marginTop: '12px' }}>
+              GetAgent Studio is free — open{' '}
+              <a href="https://getagent.studio/" style={{ color: 'var(--accent)' }} target="_blank" rel="noopener noreferrer">
+                getagent.studio
+              </a>{' '}
+              and sign in with your Bitget account. No whitelist required.
+            </p>
+          </div>
+
+          <div style={{ ...cardStyle, borderLeft: '3px solid var(--accent)' }}>
+            <p style={stepNumStyle}>Path B — Full Playbook loop (coding agent)</p>
             <h3
               style={{
                 fontFamily: 'var(--font-display)',
@@ -343,9 +372,9 @@ export default function GuidePage() {
     ↓
 MÓOU — spec + risk + deploy prompt
     ↓
-Your Playbook API key + getagent skill
-    ↓
-Upload → Backtest → Publish on Bitget Playbook`}
+Path C: GetAgent Studio → paper trade → public strategy link + metrics
+    or
+Path B: Playbook API key + getagent skill → upload → backtest → publish`}
           </pre>
         </div>
       </section>

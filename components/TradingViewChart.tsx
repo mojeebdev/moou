@@ -108,20 +108,21 @@ export default function TradingViewChart() {
       }
     })
 
-    iframeObserver.observe(containerRef.current, { childList: true, subtree: true })
+    const mountNode = containerRef.current
+    iframeObserver.observe(mountNode, { childList: true, subtree: true })
     script.addEventListener('load', markLoaded)
     const fallbackTimer = window.setTimeout(markLoaded, 5000)
 
     wrapper.appendChild(widget)
     wrapper.appendChild(script)
-    containerRef.current.appendChild(wrapper)
+    mountNode.appendChild(wrapper)
 
     return () => {
       iframeObserver.disconnect()
       script.removeEventListener('load', markLoaded)
       window.clearTimeout(fallbackTimer)
       mountedRef.current = false
-      if (containerRef.current) containerRef.current.innerHTML = ''
+      mountNode.innerHTML = ''
     }
   }, [shouldLoad])
 

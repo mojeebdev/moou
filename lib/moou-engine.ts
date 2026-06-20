@@ -2,31 +2,91 @@ import type { Risk, Strategy } from '@/lib/types'
 
 export const QWEN_URL = 'https://hackathon.bitgetops.com/v1/chat/completions'
 export const QWEN_MODEL = 'qwen3.6-plus'
+const QWEN_TIMEOUT_MS = 60_000
 
-async function callQwen(messages: { role: string; content: string }[], maxTokens: number) {
-  const response = await fetch(QWEN_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.QWEN_KEY}`,
-    },
-    body: JSON.stringify({
-      model: QWEN_MODEL,
-      max_tokens: maxTokens,
-      messages,
-    }),
-  })
+function isStrategy(value: unknown): value is Strategy {
+  if (!value || typeof value !== 'object') return false
+  const record = value as Record<string, unknown>
+  return [
+    'strategy_name',
+    'entry_conditions',
+    'exit_conditions',
+    'position_sizing',
+    'market_regime',
+    'regime_description',
+    'playbook_format',
+  ].every((key) => typeof record[key] === 'string' && (record[key] as string).trim().length > 0)
+}
 
-  if (!response.ok) return null
+function isRisk(value: unknown): value is Risk {
+  if (!value || typeof value !== 'object') return false
+  const record = value as Record<string, unknown>
+  const scoreKeys = [
+    'overall_score',
+    'volatility_exposure',
+    'drawdown_risk',
+    'leverage_sensitivity',
+    'regime_dependency',
+    'execution_complexity',
+  ]
+  const noteKeys = [
+    'verdict',
+    'volatility_note',
+    'drawdown_note',
+    'leverage_note',
+    'regime_note',
+    'execution_note',
+  ]
 
-  const data = await response.json()
-  const text = data.choices[0].message.content as string
-  const clean = text.replace(/```json|```/g, '').trim()
+  return (
+    scoreKeys.every((key) => typeof record[key] === 'number') &&
+    noteKeys.every((key) => typeof record[key] === 'string' && (record[key] as string).trim().length > 0)
+  )
+}
+
+async function callQwen<T>(
+  messages: { role: string; content: string }[],
+  maxTokens: number,
+  validate: (value: unknown) => value is T
+): Promise<T | null> {
+  if (!process.env.QWEN_KEY) return null
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), QWEN_TIMEOUT_MS)
 
   try {
-    return JSON.parse(clean)
+    const response = await fetch(QWEN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.QWEN_KEY}`,
+      },
+      body: JSON.stringify({
+        model: QWEN_MODEL,
+        max_tokens: maxTokens,
+        messages,
+      }),
+      signal: controller.signal,
+    })
+
+    if (!response.ok) return null
+
+    const data = await response.json()
+    const content = data?.choices?.[0]?.message?.content
+    if (typeof content !== 'string') return null
+
+    const clean = content.replace(/```json|```/g, '').trim()
+
+    try {
+      const parsed = JSON.parse(clean)
+      return validate(parsed) ? parsed : null
+    } catch {
+      return null
+    }
   } catch {
     return null
+  } finally {
+    clearTimeout(timer)
   }
 }
 
@@ -63,7 +123,8 @@ Output ONLY this exact JSON:
 }`,
       },
     ],
-    1000
+    1000,
+    isStrategy
   )
 }
 
@@ -106,6 +167,7 @@ Output ONLY this exact JSON:
 }`,
       },
     ],
-    800
+    800,
+    isRisk
   )
 }

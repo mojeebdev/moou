@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 const STEPS = [
   {
     num: '01',
@@ -14,8 +16,20 @@ const STEPS = [
   {
     num: '03',
     icon: '→',
-    title: 'Deploy to Bitget',
-    body: 'Copy for Playbook (quick) or use the getagent Deploy Prompt for the full upload → backtest → publish loop. See the User Guide.',
+    title: 'Validate & deploy',
+    body: (
+      <>
+        Paper-trade on{' '}
+        <a href="https://getagent.studio/" style={{ color: 'var(--accent)' }} target="_blank" rel="noopener noreferrer">
+          GetAgent Studio
+        </a>{' '}
+        for demo metrics, or deploy via Playbook copy / getagent prompt. See the{' '}
+        <Link href="/guide" style={{ color: 'var(--accent)' }}>
+          User Guide
+        </Link>
+        .
+      </>
+    ),
   },
 ]
 

@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import CompileSection from '@/components/CompileSection'
@@ -25,13 +25,9 @@ export default function Home() {
   const [strategy, setStrategy] = useState<Strategy | null>(null)
   const [risk, setRisk] = useState<Risk | null>(null)
   const [showOutput, setShowOutput] = useState(false)
-  const [vault, setVault] = useState<VaultEntry[]>([])
+  const [vault, setVault] = useState<VaultEntry[]>(() => loadVault())
   const [meta, setMeta] = useState<VaultMeta | null>(null)
   const [toast, setToast] = useState('')
-
-  useEffect(() => {
-    setVault(loadVault())
-  }, [])
 
   const handleCompile = async () => {
     const trimmed = userInput.trim()
