@@ -433,8 +433,8 @@ Path B: Playbook API key + getagent skill → upload → backtest → publish`}
                 GitHub Issues
               </a>
               {' · '}
-              <a href="https://x.com/mojeebeth" style={{ color: 'var(--accent)' }}>
-                @mojeebeth
+              <a href="https://x.com/tmojeeb" style={{ color: 'var(--accent)' }}>
+                @tmojeeb
               </a>
               {' · '}
               <a href="https://t.me/+o1tYqQ_lXxllYjgy" style={{ color: 'var(--accent)' }}>

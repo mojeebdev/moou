@@ -64,7 +64,7 @@ Codes: MISSING_FIELDS (400), INVALID_MARKET (400), RATE_LIMIT_EXCEEDED (429), CO
 
 Email: support@usemoou.xyz
 GitHub Issues: https://github.com/mojeebdev/moou/issues
-X: @mojeebeth
+X: @tmojeeb
 Bitget Hackathon Telegram: https://t.me/+o1tYqQ_lXxllYjgy
 
 ## Rules for you

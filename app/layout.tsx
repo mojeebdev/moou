@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     description:
       'Natural language → structured strategy + risk score + Bitget Playbook output.',
     images: [ogImage],
-    creator: '@mojeebeth',
+    creator: '@tmojeeb',
   },
 }
 

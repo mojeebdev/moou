@@ -85,8 +85,8 @@ export default function ApiAccessSection() {
             GitHub Issues
           </a>
           {' · '}
-          <a href="https://x.com/mojeebeth" style={{ color: 'var(--accent)' }}>
-            @mojeebeth
+          <a href="https://x.com/tmojeeb" style={{ color: 'var(--accent)' }}>
+            @tmojeeb
           </a>
           .
         </p>

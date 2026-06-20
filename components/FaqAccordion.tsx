@@ -54,7 +54,7 @@ const FAQ_ITEMS = [
   {
     question: 'Where do I get support?',
     answer:
-      'Email support@usemoou.xyz, open a GitHub Issue on github.com/mojeebdev/moou, message @mojeebeth on X, or join the Bitget Hackathon Telegram community for Playbook keys and Qwen credits.',
+      'Email support@usemoou.xyz, open a GitHub Issue on github.com/mojeebdev/moou, message @tmojeeb on X, or join the Bitget Hackathon Telegram community for Playbook keys and Qwen credits.',
   },
 ] as const
 

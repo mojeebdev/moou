@@ -50,7 +50,7 @@ Five minutes to your first API compile:
 
 Interactive reference: [Developer Docs](https://usemoou.xyz/docs) · [API.md](./API.md) · [MCP setup](./mcp-server/README.md) · [Integration Prompt](./INTEGRATION_PROMPT.md)
 
-**Need help?** [support@usemoou.xyz](mailto:support@usemoou.xyz) · [GitHub Issues](https://github.com/mojeebdev/moou/issues) · [@mojeebeth](https://x.com/mojeebeth) · [Bitget Hackathon Telegram](https://t.me/+o1tYqQ_lXxllYjgy)
+**Need help?** [support@usemoou.xyz](mailto:support@usemoou.xyz) · [GitHub Issues](https://github.com/mojeebdev/moou/issues) · [@tmojeeb](https://x.com/tmojeeb) · [Bitget Hackathon Telegram](https://t.me/+o1tYqQ_lXxllYjgy)
 
 ## Public API
 
@@ -190,7 +190,7 @@ INTEGRATION_PROMPT.md      # LLM integration prompt (copy-paste)
 
 ## Credits
 
-**Built by:** Mojeeb Titilayo · [BlindspotLab](https://blindspotlab.xyz) · [@mojeebeth](https://x.com/mojeebeth)
+**Built by:** Mojeeb Titilayo · [BlindspotLab](https://blindspotlab.xyz) · [@tmojeeb](https://x.com/tmojeeb)
 
 **Powered by:** Qwen (Alibaba Cloud) · Bitget Agent Hub · Foresight Ventures · Bitget AI
 

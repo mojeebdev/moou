@@ -602,7 +602,7 @@ export default function DocsPage() {
               {' · '}
               <a href="https://github.com/mojeebdev/moou/issues" style={{ color: 'var(--accent)' }}>GitHub Issues</a>
               {' · '}
-              <a href="https://x.com/mojeebeth" style={{ color: 'var(--accent)' }}>@mojeebeth</a>
+              <a href="https://x.com/tmojeeb" style={{ color: 'var(--accent)' }}>@tmojeeb</a>
               {' · '}
               <a href="https://t.me/+o1tYqQ_lXxllYjgy" style={{ color: 'var(--accent)' }}>Bitget Hackathon Telegram</a>
             </p>

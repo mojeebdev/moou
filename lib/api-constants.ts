@@ -12,7 +12,7 @@ export function rateLimitMessage(): string {
 
 export const SUPPORT = {
   github: 'https://github.com/mojeebdev/moou/issues',
-  x: 'https://x.com/mojeebeth',
+  x: 'https://x.com/tmojeeb',
   telegram: 'https://t.me/+o1tYqQ_lXxllYjgy',
   email: 'support@usemoou.xyz',
 } as const

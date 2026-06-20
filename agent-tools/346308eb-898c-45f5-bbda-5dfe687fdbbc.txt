@@ -1,0 +1,181 @@
+
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2238:{"timestamp":1781423542,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"You were right 
+that collections auto-create - but **only when the route that writes to Firestore runs**. That wasn't happening for 
+the website compile flow.\n\n## What happened\n\nThe **website** uses:\n- `POST /api/compile`  strategy\n- `POST 
+/api/score`  risk\n\nFirestore writes were **only** in:\n- `POST /api/v1/compile`  public API\n\nSo a compile on 
+**usemoou.xyz** or **localhost** could succeed in the UI but **never touch Firestore**. No bug in Firebase setup - 
+wrong code path.\n\n## What gets created (and when)\n\n| Collection | Document | Created when 
+|\n|------------|----------|--------------|\n| `stats` | `global` | Successful compile completes |\n| `ratelimits` | 
+`{hashedIp}` | Only on **`/api/v1/compile`** (public API rate limit) |\n\nUsing the **web UI**, you should see 
+**`stats/global`** after a compile. You won't see **`ratelimits`** unless someone hits the public API.\n\n## Fix 
+(pushed)\n\n`POST /api/score` now calls `incrementCompilationCount()` after a successful score - so **web compiles 
+update `stats/global`**.\n\nCommit: `f64535c` on `main`\n\n## What you should do\n\n1. **Redeploy on Vercel** (or wait 
+for auto-deploy from GitHub).\n2. Confirm **all Firebase env vars** are set on Vercel (same as local `.env`):\n   - 
+`FIREBASE_PROJECT_ID`\n   - `FIREBASE_CLIENT_EMAIL`\n   - `FIREBASE_PRIVATE_KEY`\n   - `IP_SALT`\n3. **Compile again** 
+on the site.\n4. In Firebase Console  Firestore  project **`usemoou`**  database **`(default)`**  you should 
+see:\n\n```\nstats\n  ��� global\n        total_compilations: 1\n```\n\n5. Check counter: 
+`https://usemoou.xyz/api/v1/stats`\n\nIf it's still empty after redeploy, Firebase env vars are likely missing on 
+Vercel - the increment fails silently by design so the app keeps working. Say if you want help verifying Vercel env set
+up."}},"_meta":{"totalTokens":163001,"eventId":"019ebeac-0c4d-78e0-8275-ef33467d469b-19001","agentTimestampMs":17814235
+42268,"promptId":"0c85f974-9454-48d7-ad34-234f1113389a","streamStartMs":1781423539605,"turnStartMs":1781423491721,"upda
+teType":"AgentMessageChunk","chunkId":473}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2253:{"timestamp":1781423642,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"Yes - everything 
+is in good shape. You can compile again on the **website** without eating into the 10/hour public API limit.\n\n## 
+Status\n\n| Item | Status |\n|------|--------|\n| Latest fix pushed | `f64535c` - web compiles update Firestore 
+`stats/global` |\n| Repo | Clean, synced with GitHub |\n| Build | Passing (from last check) |\n| Firebase (local) | 
+Connected to `usemoou` |\n\nAfter Vercel redeploys from `main`, the site compile flow will write to 
+Firestore.\n\n---\n\n## Rate limit - what counts toward the 10/hour\n\nThe **10 requests per hour** limit applies 
+**only** to the **public API**:\n\n```\nPOST https://usemoou.xyz/api/v1/compile\n```\n\nIt does **not** apply when you 
+use the **website** (Compile Strategy button), which calls:\n\n- `/api/compile`\n- `/api/score`\n\nThose internal 
+routes have **no rate limit**. You can compile on the UI as much as you want without hitting the 10/hour cap.\n\n| 
+Action | Rate limited? | Updates `stats/global`? | Creates `ratelimits` doc? 
+|\n|--------|---------------|-------------------------|---------------------------|\n| Website compile | No | Yes 
+(after fix + redeploy) | No |\n| Public API `/api/v1/compile` | Yes (10/hr per IP) | Yes | Yes |\n| `curl` / external 
+integrations | Only if using `/api/v1/compile` | Yes | Yes |\n\n---\n\n## Before you compile again\n\n1. Confirm 
+Vercel finished deploying commit `f64535c`.\n2. Confirm Firebase env vars are on Vercel (or local `.env` if testing 
+locally).\n3. Compile on the site - safe for rate limit; you're not misusing the public API quota.\n\nAfter a 
+successful compile, check:\n\n- Firebase  `stats`  `global`  `total_compilations` should go up\n- 
+`https://usemoou.xyz/api/v1/stats` should reflect the count\n\nYou still won't see `ratelimits` from website compiles 
+- that's expected. Those docs only appear when someone uses the public `/api/v1/compile` endpoint."}},"_meta":{"totalTo
+kens":164373,"eventId":"019ebeac-0c4d-78e0-8275-ef33467d469b-19547","agentTimestampMs":1781423642268,"promptId":"a953e1
+40-5df2-427a-9c20-4af557705f6d","streamStartMs":1781423639138,"turnStartMs":1781423627517,"updateType":"AgentMessageChu
+nk","chunkId":483}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2268:{"timestamp":1781424178,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"**No - the 
+website does not read or check the chart before compiling.**\n\nThe TradingView chart and the compile pipeline are 
+**separate**. You can answer it like this:\n\n---\n\n## How it actually works\n\n```\n�����������������Ŀ     
+������������������Ŀ     �������������Ŀ\n�  Form inputs    � �� �  Qwen (compile   � �� �  Strategy   �\n�  + your 
+text    �     �  + score)        �     �  output     �\n�������������������     ��������������������     
+���������������\n\n�����������������Ŀ\n�  TradingView    �  isual reference only\n�  chart          �     (not 
+sent to the API)\n�������������������\n```\n\nWhen you hit **Compile Strategy**, the app only sends:\n\n- Your 
+**strategy text** (textarea)\n- **Market** (dropdown)\n- **Timeframe** (dropdown)\n- **Conditions / regime** 
+(dropdown)\n\nIt does **not** send:\n\n- Chart symbol (BTC, ETH, etc.)\n- Price, RSI, candles, or indicators from the 
+chart\n- Anything from TradingView's API\n\nThe chart is there so traders can **look at the market while writing** 
+their idea - same as having TradingView open in another tab.\n\n---\n\n## What powers the strategy\n\n| Input | Used? 
+|\n|-------|--------|\n| Plain-English strategy description | Yes |\n| Market / timeframe / regime selects | Yes |\n| 
+TradingView chart data | **No** |\n| Live Bitget prices | **No** |\n\nQwen structures your **words** plus those three 
+dropdowns. It does not verify that RSI is actually below 30 on the chart right now.\n\n---\n\n## One-liner for judges 
+/ demos\n\n> "MOOU compiles **natural-language intent** into a structured strategy and risk score. The chart is a 
+**live Bitget reference UI** - it helps you form the idea, but compilation is driven by your description and metadata, 
+not live chart feeds."\n\n---\n\n## If they ask "shouldn't it use the chart?"\n\nThat would be a **future 
+enhancement** (e.g. pass symbol + timeframe into the prompt, or pull indicators). Today it's **by design**: NL  spec 
+ risk  Playbook, not chart  automated signals.\n\nBeing clear about that is a strength - you're not claiming the AI 
+"saw" the chart when it didn't."}},"_meta":{"totalTokens":166659,"eventId":"019ebeac-0c4d-78e0-8275-ef33467d469b-20142"
+,"agentTimestampMs":1781424178506,"promptId":"eed0dff4-42ad-4bd7-9a05-1185545ce463","streamStartMs":1781424174634,"turn
+StartMs":1781424166053,"updateType":"AgentMessageChunk","chunkId":542}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2282:{"timestamp":1781424488,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"agent_message_chunk","content":{"type":"text","text":"Here's the honest 
+picture of **what "Bitget" means in MOOU** - useful if someone asks in a demo or judging.\n\n---\n\n## Two different 
+"Bitget" connections\n\n| Connection | What it is | Automatic? |\n|------------|------------|------------|\n| **Bitget 
+hackathon AI proxy** | `https://hackathon.bitgetops.com/v1/chat/completions` - runs **Qwen3.6-plus** | Yes - every 
+compile/score uses this |\n| **Bitget Playbook / trading** | The **output text** you copy into Bitget's product | 
+**No** - manual copy-paste, no Playbook API call |\n\nMOOU does **not** deploy strategies to Bitget's exchange or 
+Playbook backend. It **prepares** them in a format meant for Bitget's ecosystem.\n\n---\n\n## What actually gets 
+called (server-side)\n\nOnly the **Qwen proxy** (sponsored hackathon endpoint):\n\n```\nPOST 
+https://hackathon.bitgetops.com/v1/chat/completions\nAuthorization: Bearer {QWEN_KEY}\nmodel: 
+qwen3.6-plus\n```\n\nThat powers:\n1. **Compile** - turn your English idea into a structured strategy  \n2. **Score** 
+- risk breakdown  \n\nNo Bitget order API, no Playbook REST API, no wallet connection.\n\n---\n\n## Strategy structure 
+MOOU produces\n\nAfter compile + score, you get this shape:\n\n### Strategy spec (from Qwen)\n\n```json\n{\n  
+\"strategy_name\": \"RSI Funding Reversal\",\n  \"entry_conditions\": \"...\",\n  \"exit_conditions\": \"...\",\n  
+\"position_sizing\": \"...\",\n  \"market_regime\": \"ranging\",\n  \"regime_description\": \"...\",\n  
+\"playbook_format\": \"...\"\n}\n```\n\n| Field | Meaning |\n|-------|---------|\n| `strategy_name` | Short name for 
+the idea |\n| `entry_conditions` | When to enter |\n| `exit_conditions` | When to exit, stops, targets |\n| 
+`position_sizing` | How much to risk/size |\n| `market_regime` | `trending` / `ranging` / `neutral` |\n| 
+`regime_description` | When t
+
+... (output truncated) ...
+
+,109,100,10,32,32,50,54,53,58,32,32,34,112,108,97,121,98,111,111,107,95,102,111,114,109,97,116,34,58,32,
+34,69,120,112,108,111,105,116,32,101,115,116,97,98,108,105,115,104,101,100,32,114,97,110,103,101,32,98,111,117,110,100,
+97,114,105,101,115,32,111,110,32,66,84,67,32,112,101,114,112,101,116,117,97,108,32,102, [... omitted end of long line]"
+},{"line_number":2298,"content":"{\"timestamp\":1781425104,\"method\":\"session/update\",\"params\":{\"sessionId\":\"01
+9ebeac-0c4d-78e0-8275-ef33467d469b\",\"update\":{\"sessionUpdate\":\"tool_call_update\",\"toolCallId\":\"call-3498731c-
+ff22-4ce5-9252-9e9fd167aace-composer_call_N4b9D\",\"status\":\"completed\",\"content\":[{\"type\":\"content\",\"content
+\":{\"type\":\"text\",\"text\":\"found 2 matches\"}}],\"rawOutput\":{\"type\":\"GrepSearch\",\"stdout\":[60,119,111,114
+,107,115,112,97,99,101,95,114,101,115,117,108,116,32,119,111,114,107,115,112,97,99,101,95,112,97,116,104,61,34,67,58,92
+,85,115,101,114,115,92,85,83,69,82,92,68,101,115,107,116,111,112,92,109,111,106,101,101,98,100,101,118,92,72,97,99,107,
+97,116,104,111,110,115,92,77,79,79,85,34,62,10,108,105,98,92,102,105,114,101,98,97,115,101,45,97,100,109,105,110,46,116
+,115,10,32,32,50,55,58,32,32,32,32,32,32,116,104,114,111,119,32,110,101,119,32,69,114,114,111,114,40,39,70,105,114,101,
+98,97,115,101,32,65,100,109,105,110,32,99,114,101,100,101,110,116,105,97,108,115,32,97,114,101,32,110,111,116,32,99,111
+,110,102,105 [... omitted end of long line]"},{"line_number":2300,"content":"{\"timestamp\":1781425106,\"method\":\"ses
+sion/update\",\"params\":{\"sessionId\":\"019ebeac-0c4d-78e0-8275-ef33467d469b\",\"update\":{\"sessionUpdate\":\"agent_
+thought_chunk\",\"content\":{\"type\":\"text\",\"text\":\"Let me search the transcript for playbook credentials and 
+also check for .env files, Bitget API references, etc.\"}},\"_meta\":{\"totalTokens\":12530,\"eventId\":\"019ebeac-0c4d
+-78e0-8275-ef33467d469b-21380\",\"agentTimestampMs\":1781425106444,\"promptId\":\"e5b338fc-fe04-49a4-ace4-8e761cbf3e45\
+",\"streamStartMs\":1781425105438,\"turnStartMs\":1781425067065,\"updateType\":\"AgentThoughtChunk\",\"chunkId\":23}}}"
+},{"line_number":2302,"content":"{\"timestamp\":1781425106,\"method\":\"session/update\",\"params\":{\"sessionId\":\"01
+9ebeac-0c4d-78e0-8275-ef33467d469b\",\"update\":{\"sessionUpdate\":\"tool_call\",\"toolCallId\":\"call-df35fefe-88de-4c
+8e-b028-dc0b8282936a-composer_call_Y3P6k\",\"title\":\"Grep\",\"rawInput\":{\"pattern\":\"playbook|credential|bitget|AP
+I_KEY|\\\\.env\",\"path\":\"C:\\\\Users\\\\USER\\\\.grok\\\\sessions\\\\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHac
+kathons%5CMOOU\\\\019ebeac-0c4d-78e0-8275-ef33467d469b\\\\updates.jsonl\",\"-i\":true,\"head_limit\":40.0}},\"_meta\":{
+\"totalTokens\":12710,\"eventId\":\"019ebeac-0c4d-78e0-8275-ef33467d469b-21382\",\"agentTimestampMs\":1781425106687,\"p
+romptId\":\"e5b338fc-fe04-49a4-ace4-8e761cbf3e45\",\"streamStartMs\":1781425105438,\"turnStartMs\":1781425067065,\"upda
+teType\":\"ToolCall\",\"updateParams\":{\"toolCallId\":\"call-df35fefe-88de-4c8e-b028-dc0b8282936a-composer_call_Y3P6k\
+",\"title\":\"Grep\",\"kind\":\"Other\",\"status\":\"Pending\"}}}}"},{"line_number":2303,"content":"{\"timestamp\":1781
+425106,\"method\":\"session/update\",\"params\":{\"sessionId\":\"019ebeac-0c4d-78e0-8275-ef33467d469b\",\"update\":{\"s
+essionUpdate\":\"tool_call_update\",\"toolCallId\":\"call-df35fefe-88de-4c8e-b028-dc0b8282936a-composer_call_Y3P6k\",\"
+kind\":\"search\",\"title\":\"playbook|credential|bitget|API_KEY|\\\\.env\",\"locations\":[],\"rawInput\":{\"variant\":
+\"CursorGrep\",\"pattern\":\"playbook|credential|bitget|API_KEY|\\\\.env\",\"path\":\"C:\\\\Users\\\\USER\\\\.grok\\\\s
+essions\\\\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\\\\019ebeac-0c4d-78e0-8275-ef33467d469b\\\\upd
+ates.jsonl\",\"-i\":true,\"head_limit\":40}},\"_meta\":{\"totalTokens\":12710,\"eventId\":\"019ebeac-0c4d-78e0-8275-ef3
+3467d469b-21383\",\"agentTimestampMs\":1781425106688,\"promptId\":\"e5b338fc-fe04-49a4-ace4-8e761cbf3e45\",\"streamStar
+tMs\":1781425105438,\"turnStartMs\":1781425067065,\"updateType\":\"ToolCallUpdate\",\"updateParams\":{\"toolCallId\":\"
+call-df35fefe-88de-4c8e-b028-dc0b8282936a-composer_call_Y3P6k\",\"status\":null}}}}"},{"line_number":2304,"content":"{\
+"timestamp\":1781425106,\"method\":\"session/update\",\"params\":{\"sessionId\":\"019ebeac-0c4d-78e0-8275-ef33467d469b\
+",\"update\":{\"sessionUpdate\":\"tool_call\",\"toolCallId\":\"call-df35fefe-88de-4c8e-b028-dc0b8282936a-composer_call_
+9w8e4\",\"title\":\"Glob\",\"rawInput\":{\"glob_pattern\":\"**/.env*\",\"target_directory\":\"C:\\\\Users\\\\USER\\\\De
+sktop\\\\mojeebdev\\\\Hackathons\\\\MOOU\"}},\"_meta\":{\"totalTokens\":12710,\"eventId\":\"019ebeac-0c4d-78e0-8275-ef3
+3467d469b-21384\",\"agentTimestampMs\":1781425106690,\"promptId\":\"e5b338fc-fe04-49a4-ace4-8e761cbf3e45\",\"streamStar
+tMs\":1781425105438,\"turnStartMs\":1781425067065,\"updateType\":\"ToolCall\",\"updateParams\":{\"toolCallId\":\"call-d
+f35fefe-88de-4c8e-b028-dc0b8282936a-composer_call_9w8e4\",\"title\":\"Glob\",\"kind\":\"Other\",\"status\":\"Pending\"}
+}}}"}]}]}},"_meta":{"totalTokens":12710,"eventId":"019ebeac-0c4d-78e0-8275-ef33467d469b-21390","agentTimestampMs":17814
+25129595,"promptId":"e5b338fc-fe04-49a4-ace4-8e761cbf3e45","streamStartMs":1781425105438,"turnStartMs":1781425067065,"u
+pdateType":"ToolCallUpdate","updateParams":{"toolCallId":"call-df35fefe-88de-4c8e-b028-dc0b8282936a-composer_call_Y3P6k
+","status":"Completed"}}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2341:{"timestamp":1781425340,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"agent_thought_chunk","content":{"type":"text","text":"Let me search the 
+transcript more carefully for the recent conversation about playbook credentials. The user said \"let's add that as 
+well\" - implying we were discussing adding credentials to .env. Let me read the end of the transcript file."}},"_meta"
+:{"totalTokens":21216,"eventId":"019ebeac-0c4d-78e0-8275-ef33467d469b-21541","agentTimestampMs":1781425340407,"promptId
+":"e5b338fc-fe04-49a4-ace4-8e761cbf3e45","streamStartMs":1781425339489,"turnStartMs":1781425067065,"updateType":"AgentT
+houghtChunk","chunkId":47}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2359:{"timestamp":1781425364,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"agent_thought_chunk","content":{"type":"text","text":"Let me search the 
+transcript for the user's message about playbook credentials and what was discussed before. I'll grep for 
+\"agent_message\" or user query in the transcript."}},"_meta":{"totalTokens":28041,"eventId":"019ebeac-0c4d-78e0-8275-e
+f33467d469b-21596","agentTimestampMs":1781425364638,"promptId":"e5b338fc-fe04-49a4-ace4-8e761cbf3e45","streamStartMs":1
+781425361144,"turnStartMs":1781425067065,"updateType":"AgentThoughtChunk","chunkId":32}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2361:{"timestamp":1781425364,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"tool_call","toolCallId":"call-6e66eba3-2e85-4ca7-bb98-f0619b7f9ab2-compo
+ser_call_kLDxP","title":"Shell","rawInput":{"command":"Select-String -Path \"C:\\Users\\USER\\.grok\\sessions\\C%3A%5CU
+sers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\\019ebeac-0c4d-78e0-8275-ef33467d469b\\updates.jsonl\" -Pattern 
+\"playbook credent|user_query|agent_message_chunk\" | Select-Object -Last 15","description":"Search transcript for 
+user messages about credentials"}},"_meta":{"totalTokens":30575,"eventId":"019ebeac-0c4d-78e0-8275-ef33467d469b-21598",
+"agentTimestampMs":1781425364772,"promptId":"e5b338fc-fe04-49a4-ace4-8e761cbf3e45","streamStartMs":1781425361144,"turnS
+tartMs":1781425067065,"updateType":"ToolCall","updateParams":{"toolCallId":"call-6e66eba3-2e85-4ca7-bb98-f0619b7f9ab2-c
+omposer_call_kLDxP","title":"Shell","kind":"Other","status":"Pending"}}}}
+C:\Users\USER\.grok\sessions\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\019ebeac-0c4d-78e0-8275-ef33
+467d469b\updates.jsonl:2362:{"timestamp":1781425364,"method":"session/update","params":{"sessionId":"019ebeac-0c4d-78e0
+-8275-ef33467d469b","update":{"sessionUpdate":"tool_call_update","toolCallId":"call-6e66eba3-2e85-4ca7-bb98-f0619b7f9ab
+2-composer_call_kLDxP","kind":"execute","title":"Execute `Select-String -Path \"C:\\Users\\USER\\.grok\\sessions\\C%3A%
+5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\\019ebeac-0c4d-78e0-8275-ef33467d469b\\updates.jsonl\" 
+-Pattern \"playbook credent|user_query|agent_message_chunk\" | Select-Object -Last 
+15`","content":[{"type":"content","content":{"type":"text","text":"Search transcript for user messages about 
+credentials"}}],"locations":[],"rawInput":{"variant":"CursorShell","command":"Select-String -Path \"C:\\Users\\USER\\.g
+rok\\sessions\\C%3A%5CUsers%5CUSER%5CDesktop%5Cmojeebdev%5CHackathons%5CMOOU\\019ebeac-0c4d-78e0-8275-ef33467d469b\\upd
+ates.jsonl\" -Pattern \"playbook credent|user_query|agent_message_chunk\" | Select-Object -Last 
+15","description":"Search transcript for user messages about credentials"}},"_meta":{"totalTokens":30575,"eventId":"019
+ebeac-0c4d-78e0-8275-ef33467d469b-21599","agentTimestampMs":1781425364772,"promptId":"e5b338fc-fe04-49a4-ace4-8e761cbf3
+e45","streamStartMs":1781425361144,"turnStartMs":1781425067065,"updateType":"ToolCallUpdate","updateParams":{"toolCallI
+d":"call-6e66eba3-2e85-4ca7-bb98-f0619b7f9ab2-composer_call_kLDxP","status":null}}}}
+
+
