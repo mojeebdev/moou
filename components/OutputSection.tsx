@@ -3,7 +3,7 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import type { Risk, Strategy } from '@/lib/types'
 import ActionButton from '@/components/ActionButton'
-import WorkflowPnlCard from '@/components/WorkflowPnlCard'
+
 import {
   GETAGENT_STUDIO_URL,
   buildGetagentDeployPrompt,
@@ -388,12 +388,6 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
         </div>
 
         <div className="border-t border-[var(--void-05)]" style={{ marginTop: '64px', paddingTop: '60px' }}>
-          <WorkflowPnlCard
-            key={`${strategy.strategy_name}-${risk.overall_score}`}
-            strategy={strategy}
-            risk={risk}
-          />
-
           <span
             style={{
               display: 'block',
@@ -448,7 +442,7 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
             <a href="/guide#playbook" style={{ color: 'var(--accent)' }}>
               User Guide
             </a>{' '}
-            explains all three deploy paths.
+            explains deploy options.
           </p>
           {copyError && (
             <p
@@ -462,62 +456,13 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
               {copyError}
             </p>
           )}
-          <div
-            style={{
-              ...GLASS_PANEL,
-              marginBottom: '24px',
-              borderLeft: '3px solid var(--risk-low)',
-            }}
-          >
-            <span
-              style={{
-                display: 'block',
-                color: 'var(--risk-low)',
-                fontFamily: 'var(--font-accent)',
-                fontSize: '11px',
-                fontWeight: 600,
-                letterSpacing: '0.14em',
-                marginBottom: '12px',
-                textTransform: 'uppercase',
-              }}
-            >
-              Path C — Paper trade on GetAgent Studio (recommended for demo)
-            </span>
-            <p
-              style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: '15px',
-                color: 'var(--ink-secondary)',
-                lineHeight: 1.8,
-                marginBottom: '16px',
-              }}
-            >
-              <a href={GETAGENT_STUDIO_URL} style={{ color: 'var(--accent)' }} target="_blank" rel="noopener noreferrer">
-                GetAgent Studio
-              </a>{' '}
-              is free — sign in with your Bitget account. Backtest and paper-trade your MÓOU strategy,
-              then share the public Studio link and performance metrics in your hackathon submission.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <ActionButton
-                variant="primary"
-                onClick={() => window.open(GETAGENT_STUDIO_URL, '_blank', 'noopener,noreferrer')}
-              >
-                Open GetAgent Studio →
-              </ActionButton>
-              <ActionButton variant="secondary" onClick={copyStudioPrompt}>
-                {copiedStudio ? 'Copied ✓' : 'Copy Studio Paper-Trade Prompt'}
-              </ActionButton>
-            </div>
-          </div>
-
           <div style={{ ...GLASS_PANEL, marginBottom: '24px' }}>
             <label
               htmlFor="playbook-key"
               className="block text-[10px] uppercase tracking-[0.1em] text-[var(--ink-tertiary)] mb-2"
               style={{ fontFamily: 'var(--font-accent)' }}
             >
-              Playbook API key (optional — Path B)
+              Playbook API key (optional)
             </label>
             <input
               id="playbook-key"
@@ -535,6 +480,15 @@ export default function OutputSection({ strategy, risk, isVisible, onSaveToVault
               </ActionButton>
               <ActionButton variant="secondary" onClick={copyDeployPrompt}>
                 {copiedDeploy ? 'Copied ✓' : 'Copy getagent Deploy Prompt'}
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                onClick={() => window.open(GETAGENT_STUDIO_URL, '_blank', 'noopener,noreferrer')}
+              >
+                Open GetAgent Studio →
+              </ActionButton>
+              <ActionButton variant="ghost" onClick={copyStudioPrompt}>
+                {copiedStudio ? 'Copied ✓' : 'Copy Studio Prompt'}
               </ActionButton>
               <ActionButton variant="ghost" onClick={onSaveToVault}>
                 Save to Vault

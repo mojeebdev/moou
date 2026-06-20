@@ -29,7 +29,7 @@ const FAQ_ITEMS = [
   {
     question: 'Can I deploy the compiled strategy directly?',
     answer:
-      'Yes. Three paths: (A) copy playbook_format into Bitget Playbook, (B) paste the getagent deploy prompt into Claude Code, Cursor, or Codex with @bitget-ai/getagent-skill, or (C) paper-trade on GetAgent Studio (getagent.studio) for backtest and performance data — great for hackathon demos.',
+      'Yes. Copy playbook_format into Bitget Playbook, paste the getagent deploy prompt into an agent with @bitget-ai/getagent-skill, or paper-trade on GetAgent Studio at getagent.studio.',
   },
   {
     question: 'What is GetAgent Studio?',

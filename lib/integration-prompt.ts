@@ -50,7 +50,7 @@ Path B — Coding agent:
 3. Use the deploy prompt from /deploy-prompt or MÓOU web UI "Copy getagent Deploy Prompt"
 4. getagent uploads, backtests, and publishes to Playbook explore
 
-Path C — GetAgent Studio (paper trading, best for hackathon demos):
+Path C — GetAgent Studio (paper trading):
 1. Open https://getagent.studio/ — free, sign in with Bitget account
 2. Use studio_prompt from POST /deploy-prompt or MÓOU "Copy Studio Paper-Trade Prompt"
 3. Run backtest + paper trading → submit public Studio strategy link + performance metrics

@@ -46,7 +46,7 @@ export function buildGetagentDeployPrompt(
   return `1. Install getagent using ${GETAGENT_SKILL_URL}
 2. Use getagent to create a strategy playbook from the MÓOU-compiled spec below, then upload, backtest, and publish it
 3. Once backtest succeeds, show me the key metrics in a table (PnL, max drawdown, Sharpe, win rate)
-4. Optional — run paper trading on GetAgent Studio (${GETAGENT_STUDIO_URL}) to validate live and share the public strategy link in your hackathon submission
+4. Optional — run paper trading on GetAgent Studio (${GETAGENT_STUDIO_URL})
 
 Strategy philosophy:
 ${strategy.playbook_format}
@@ -64,15 +64,15 @@ ${riskBlock}${keyLine}`
 export function buildStudioPaperTradePrompt(strategy: Strategy, risk?: PartialRisk): string {
   const riskBlock = formatRiskBlock(risk, 'MÓOU risk assessment')
 
-  return `Paper-trade this MÓOU-compiled strategy on GetAgent Studio and generate performance data for my demo.
+  return `Paper-trade this MÓOU-compiled strategy on GetAgent Studio.
 
-GetAgent Studio is free at ${GETAGENT_STUDIO_URL} — sign in with your Bitget account.
+GetAgent Studio: ${GETAGENT_STUDIO_URL} — sign in with your Bitget account.
 
 Steps:
 1. Open ${GETAGENT_STUDIO_URL}
 2. Create a strategy from the MÓOU spec below
-3. Run backtest and paper trading — capture PnL, max drawdown, Sharpe, win rate
-4. Publish and copy your public Studio strategy link (e.g. getagent.studio/strategy/...) for hackathon submission
+3. Run backtest and paper trading
+4. Publish and copy your public Studio strategy link
 
 Strategy philosophy (Playbook-ready):
 ${strategy.playbook_format}

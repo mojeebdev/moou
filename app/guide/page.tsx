@@ -195,7 +195,7 @@ export default function GuidePage() {
               marginBottom: '32px',
             }}
           >
-            Three paths. Path C is best for hackathon demos with paper-trading proof.
+            Three paths. Pick what fits your workflow.
           </p>
 
           <div style={{ ...cardStyle, borderLeft: '3px solid var(--accent)' }}>
@@ -222,7 +222,7 @@ export default function GuidePage() {
           </div>
 
           <div style={{ ...cardStyle, borderLeft: '3px solid var(--risk-low)' }}>
-            <p style={stepNumStyle}>Path C — Paper trade on GetAgent Studio (best for demo video)</p>
+            <p style={stepNumStyle}>Path C — Paper trade on GetAgent Studio</p>
             <h3
               style={{
                 fontFamily: 'var(--font-display)',

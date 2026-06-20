@@ -16,14 +16,14 @@ const STEPS = [
   {
     num: '03',
     icon: '→',
-    title: 'Validate & deploy',
+    title: 'Deploy to Bitget',
     body: (
       <>
-        Paper-trade on{' '}
+        Copy for Playbook, use the getagent deploy prompt, or paper-trade on{' '}
         <a href="https://getagent.studio/" style={{ color: 'var(--accent)' }} target="_blank" rel="noopener noreferrer">
           GetAgent Studio
-        </a>{' '}
-        for demo metrics, or deploy via Playbook copy / getagent prompt. See the{' '}
+        </a>
+        . See the{' '}
         <Link href="/guide" style={{ color: 'var(--accent)' }}>
           User Guide
         </Link>

@@ -31,7 +31,7 @@ No code required. Unlimited compiles on the website.
 3. Deploy and validate:
    - **Path A** — *Copy for Bitget Playbook* (`playbook_format` text for manual paste)
    - **Path B** — *Copy getagent Deploy Prompt* (upload → backtest → publish with `@bitget-ai/getagent-skill`)
-   - **Path C** — *GetAgent Studio* ([getagent.studio](https://getagent.studio/)) — free paper trading + performance metrics for hackathon demos
+   - **Path C** — *GetAgent Studio* ([getagent.studio](https://getagent.studio/)) — paper trading and backtest
 
 Full walkthrough: [User Guide](https://usemoou.xyz/guide)
 
