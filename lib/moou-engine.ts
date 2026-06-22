@@ -191,7 +191,7 @@ export async function compileAndScore(
       {
         role: 'system',
         content:
-          'You are MÓOU (谋), a trading strategy compiler and risk scorer. Output one JSON object only. Be concise. Score honestly: most strategies 40-75 overall. No markdown.',
+          'You are MÓOU (谋), a trading strategy compiler and risk scorer. Output one JSON object only. Score honestly: most strategies 40-75 overall. Keep risk notes to one sentence each. playbook_format must always be a full deployable paragraph for Bitget Playbook, never a label, tag, or category name. No markdown.',
       },
       {
         role: 'user',
@@ -206,11 +206,13 @@ Return JSON with exactly these keys:
 strategy_name, entry_conditions, exit_conditions, position_sizing, market_regime, regime_description, playbook_format,
 overall_score, verdict, volatility_exposure, volatility_note, drawdown_risk, drawdown_note, leverage_sensitivity, leverage_note, regime_dependency, regime_note, execution_complexity, execution_note
 
+playbook_format: a complete deployable strategy instruction, 3-4 full sentences, written as if pasted directly into Bitget Playbook. Must include the entry trigger, exit trigger, position sizing rule, and one risk management line. Do not summarize or categorize. Write the actual instruction.
+
 All score fields must be integers from 0 to 100.
 verdict must be CONSERVATIVE, MODERATE, AGGRESSIVE, or EXTREME.`,
       },
     ],
-    1100
+    1400
   )
 
   if (!parsed) return null
