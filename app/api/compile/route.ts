@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { compileStrategy } from '@/lib/moou-engine'
+import { incrementCompilationCount } from '@/lib/firebase-admin'
+import { compileAndScore } from '@/lib/moou-engine'
 
 export async function POST(req: NextRequest) {
   let body: { userInput?: string; market?: string; timeframe?: string; regime?: string }
@@ -20,10 +21,15 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const compiled = await compileStrategy(trimmed, market, timeframe, regime)
-  if (!compiled) {
+  const result = await compileAndScore(trimmed, market, timeframe, regime)
+  if (!result) {
     return NextResponse.json({ error: 'Compilation failed' }, { status: 500 })
   }
 
-  return NextResponse.json(compiled)
+  void incrementCompilationCount()
+
+  return NextResponse.json({
+    ...result.strategy,
+    risk: result.risk,
+  })
 }

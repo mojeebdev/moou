@@ -41,7 +41,7 @@ export default function Home() {
     const currentMeta: VaultMeta = { market, timeframe, regime, userInput: trimmed }
     setMeta(currentMeta)
     setIsLoading(true)
-    setLoadingMessage('谋 · Reading the board...')
+    setLoadingMessage('谋 · Compiling strategy...')
 
     try {
       const compileRes = await fetch('/api/compile', {
@@ -51,21 +51,11 @@ export default function Home() {
       })
 
       if (!compileRes.ok) throw new Error('Compile failed')
-      const strategyData: Strategy = await compileRes.json()
+      const data = await compileRes.json()
+      const { risk: riskData, ...strategyData } = data
 
-      setLoadingMessage('谋 · Scoring risk...')
-
-      const scoreRes = await fetch('/api/score', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ strategy: strategyData, market, timeframe }),
-      })
-
-      if (!scoreRes.ok) throw new Error('Score failed')
-      const riskData: Risk = await scoreRes.json()
-
-      setStrategy(strategyData)
-      setRisk(riskData)
+      setStrategy(strategyData as Strategy)
+      setRisk(riskData as Risk)
       setShowOutput(true)
 
       requestAnimationFrame(() => {

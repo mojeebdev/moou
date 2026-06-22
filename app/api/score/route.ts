@@ -33,6 +33,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Scoring failed' }, { status: 500 })
   }
 
-  await incrementCompilationCount()
+  void incrementCompilationCount()
   return NextResponse.json(risk)
 }

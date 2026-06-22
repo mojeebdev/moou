@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { API_VERSION, DOCS_URL, rateLimitMessage } from '@/lib/api-constants'
 import { corsOptions, errorResponse, getClientIp, isValidMarket, jsonResponse } from '@/lib/api-helpers'
 import { checkRateLimit, hashClientIp, incrementCompilationCount } from '@/lib/firebase-admin'
-import { compileStrategy, scoreStrategy } from '@/lib/moou-engine'
+import { QWEN_MODEL, compileAndScore } from '@/lib/moou-engine'
 
 export async function OPTIONS() {
   return corsOptions()
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const compiled = await compileStrategy(strategy.trim(), market, timeframe, regime)
-  if (!compiled) {
+  const result = await compileAndScore(strategy.trim(), market, timeframe, regime)
+  if (!result) {
     return errorResponse(
       'COMPILATION_FAILED',
       'Strategy compilation failed. Please try again.',
@@ -61,10 +61,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const risk = await scoreStrategy(compiled, market, timeframe)
-  if (!risk) {
-    return errorResponse('SCORING_FAILED', 'Risk scoring failed. Please try again.', 500)
-  }
+  const { strategy: compiled, risk } = result
 
   const processingMs = Date.now() - startTime
 
@@ -79,7 +76,7 @@ export async function POST(req: NextRequest) {
     risk,
     meta: {
       compiled_at: new Date().toISOString(),
-      model: 'qwen3.6-plus',
+      model: QWEN_MODEL,
       version: API_VERSION,
       processing_ms: processingMs,
       powered_by: 'MÓOU 谋',
@@ -87,7 +84,7 @@ export async function POST(req: NextRequest) {
     },
   }
 
-  await incrementCompilationCount()
+  void incrementCompilationCount()
 
   return jsonResponse(responseBody, 200)
 }

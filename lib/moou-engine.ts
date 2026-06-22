@@ -1,71 +1,147 @@
 import type { Risk, Strategy } from '@/lib/types'
 
 export const QWEN_URL = 'https://hackathon.bitgetops.com/v1/chat/completions'
-export const QWEN_MODEL = 'qwen3.6-plus'
-const QWEN_TIMEOUT_MS = 60_000
+export const QWEN_MODEL = process.env.QWEN_MODEL ?? 'qwen3.6-flash'
+const QWEN_TIMEOUT_MS = 90_000
+
+const STRATEGY_KEYS = [
+  'strategy_name',
+  'entry_conditions',
+  'exit_conditions',
+  'position_sizing',
+  'market_regime',
+  'regime_description',
+  'playbook_format',
+] as const
+
+const RISK_KEYS = [
+  'overall_score',
+  'verdict',
+  'volatility_exposure',
+  'volatility_note',
+  'drawdown_risk',
+  'drawdown_note',
+  'leverage_sensitivity',
+  'leverage_note',
+  'regime_dependency',
+  'regime_note',
+  'execution_complexity',
+  'execution_note',
+] as const
 
 function isStrategy(value: unknown): value is Strategy {
   if (!value || typeof value !== 'object') return false
   const record = value as Record<string, unknown>
-  return [
-    'strategy_name',
-    'entry_conditions',
-    'exit_conditions',
-    'position_sizing',
-    'market_regime',
-    'regime_description',
-    'playbook_format',
-  ].every((key) => typeof record[key] === 'string' && (record[key] as string).trim().length > 0)
-}
-
-function isRisk(value: unknown): value is Risk {
-  if (!value || typeof value !== 'object') return false
-  const record = value as Record<string, unknown>
-  const scoreKeys = [
-    'overall_score',
-    'volatility_exposure',
-    'drawdown_risk',
-    'leverage_sensitivity',
-    'regime_dependency',
-    'execution_complexity',
-  ]
-  const noteKeys = [
-    'verdict',
-    'volatility_note',
-    'drawdown_note',
-    'leverage_note',
-    'regime_note',
-    'execution_note',
-  ]
-
-  return (
-    scoreKeys.every((key) => typeof record[key] === 'number') &&
-    noteKeys.every((key) => typeof record[key] === 'string' && (record[key] as string).trim().length > 0)
+  return STRATEGY_KEYS.every(
+    (key) => typeof record[key] === 'string' && (record[key] as string).trim().length > 0
   )
 }
 
-async function callQwen<T>(
+const RISK_SCORE_KEYS = [
+  'overall_score',
+  'volatility_exposure',
+  'drawdown_risk',
+  'leverage_sensitivity',
+  'regime_dependency',
+  'execution_complexity',
+] as const
+
+const RISK_NOTE_KEYS = [
+  'verdict',
+  'volatility_note',
+  'drawdown_note',
+  'leverage_note',
+  'regime_note',
+  'execution_note',
+] as const
+
+const QUALITATIVE_SCORES: [string, number][] = [
+  ['very high', 90],
+  ['moderate-high', 65],
+  ['moderate high', 65],
+  ['moderate-low', 40],
+  ['moderate low', 40],
+  ['minimal', 15],
+  ['extreme', 95],
+  ['moderate', 50],
+  ['medium', 50],
+  ['high', 75],
+  ['low', 25],
+]
+
+function coerceScore(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.round(Math.max(0, Math.min(100, value)))
+  }
+  if (typeof value !== 'string') return null
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const direct = Number(trimmed)
+  if (!Number.isNaN(direct)) {
+    return Math.round(Math.max(0, Math.min(100, direct)))
+  }
+
+  const label = trimmed.toLowerCase()
+  for (const [token, score] of QUALITATIVE_SCORES) {
+    if (label === token || label.includes(token)) return score
+  }
+
+  return null
+}
+
+function normalizeRisk(value: unknown): Risk | null {
+  if (!value || typeof value !== 'object') return null
+  const record = value as Record<string, unknown>
+  const normalized: Record<string, unknown> = {}
+
+  for (const key of RISK_SCORE_KEYS) {
+    const score = coerceScore(record[key])
+    if (score === null) return null
+    normalized[key] = score
+  }
+
+  for (const key of RISK_NOTE_KEYS) {
+    const note = record[key]
+    if (typeof note !== 'string' || !note.trim()) return null
+    normalized[key] = key === 'verdict' ? note.trim().toUpperCase() : note.trim()
+  }
+
+  return normalized as unknown as Risk
+}
+
+function splitCombined(value: Record<string, unknown>): { strategy: Strategy; risk: Risk } | null {
+  const strategy = Object.fromEntries(STRATEGY_KEYS.map((key) => [key, value[key]]))
+  const risk = normalizeRisk(Object.fromEntries(RISK_KEYS.map((key) => [key, value[key]])))
+  if (!isStrategy(strategy) || !risk) return null
+  return { strategy, risk }
+}
+
+async function requestQwen(
   messages: { role: string; content: string }[],
   maxTokens: number,
-  validate: (value: unknown) => value is T
-): Promise<T | null> {
-  if (!process.env.QWEN_KEY) return null
-
+  jsonMode: boolean
+): Promise<Record<string, unknown> | null> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), QWEN_TIMEOUT_MS)
 
   try {
+    const payload: Record<string, unknown> = {
+      model: QWEN_MODEL,
+      max_tokens: maxTokens,
+      temperature: 0.2,
+      messages,
+    }
+    if (jsonMode) payload.response_format = { type: 'json_object' }
+
     const response = await fetch(QWEN_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.QWEN_KEY}`,
       },
-      body: JSON.stringify({
-        model: QWEN_MODEL,
-        max_tokens: maxTokens,
-        messages,
-      }),
+      body: JSON.stringify(payload),
       signal: controller.signal,
     })
 
@@ -76,10 +152,13 @@ async function callQwen<T>(
     if (typeof content !== 'string') return null
 
     const clean = content.replace(/```json|```/g, '').trim()
+    const start = clean.indexOf('{')
+    const end = clean.lastIndexOf('}')
+    const jsonText = start >= 0 && end > start ? clean.slice(start, end + 1) : clean
 
     try {
-      const parsed = JSON.parse(clean)
-      return validate(parsed) ? parsed : null
+      const parsed = JSON.parse(jsonText)
+      return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null
     } catch {
       return null
     }
@@ -90,42 +169,62 @@ async function callQwen<T>(
   }
 }
 
+async function callQwen(
+  messages: { role: string; content: string }[],
+  maxTokens: number
+): Promise<Record<string, unknown> | null> {
+  if (!process.env.QWEN_KEY) return null
+
+  const jsonResult = await requestQwen(messages, maxTokens, true)
+  if (jsonResult) return jsonResult
+  return requestQwen(messages, maxTokens, false)
+}
+
+export async function compileAndScore(
+  idea: string,
+  market: string,
+  timeframe: string,
+  regime: string
+): Promise<{ strategy: Strategy; risk: Risk } | null> {
+  const parsed = await callQwen(
+    [
+      {
+        role: 'system',
+        content:
+          'You are MÓOU (谋), a trading strategy compiler and risk scorer. Output one JSON object only. Be concise. Score honestly: most strategies 40-75 overall. No markdown.',
+      },
+      {
+        role: 'user',
+        content: `Compile and score this strategy idea.
+
+Market: ${market}
+Timeframe: ${timeframe}
+Conditions: ${regime}
+Idea: "${idea}"
+
+Return JSON with exactly these keys:
+strategy_name, entry_conditions, exit_conditions, position_sizing, market_regime, regime_description, playbook_format,
+overall_score, verdict, volatility_exposure, volatility_note, drawdown_risk, drawdown_note, leverage_sensitivity, leverage_note, regime_dependency, regime_note, execution_complexity, execution_note
+
+All score fields must be integers from 0 to 100.
+verdict must be CONSERVATIVE, MODERATE, AGGRESSIVE, or EXTREME.`,
+      },
+    ],
+    1100
+  )
+
+  if (!parsed) return null
+  return splitCombined(parsed)
+}
+
 export async function compileStrategy(
   strategy: string,
   market: string,
   timeframe: string,
   regime: string
 ): Promise<Strategy | null> {
-  return callQwen(
-    [
-      {
-        role: 'system',
-        content: `You are MÓOU (谋), an elite trading strategy compiler. Your name comes from the Chinese concept of deep strategic foresight — the calculated thinking that precedes every successful trade. Transform plain-language trading ideas into precise structured strategy specs. You understand crypto futures, spot markets, and tokenized US stocks. Be clinical, precise, never vague. Output ONLY valid JSON. No markdown. No preamble. No text outside the JSON.`,
-      },
-      {
-        role: 'user',
-        content: `Compile this trading strategy:
-
-Market: ${market}
-Timeframe: ${timeframe}
-Current market conditions: ${regime}
-Strategy idea: "${strategy}"
-
-Output ONLY this exact JSON:
-{
-  "strategy_name": "memorable 2-4 word name",
-  "entry_conditions": "precise entry logic in 2-3 sentences",
-  "exit_conditions": "exit logic with stop loss and take profit in 2-3 sentences",
-  "position_sizing": "sizing methodology in 1-2 sentences",
-  "market_regime": "trending | ranging | neutral",
-  "regime_description": "one sentence on when this strategy performs best",
-  "playbook_format": "full strategy as Bitget Playbook instruction covering philosophy, entry, exit, risk management in 3-4 sentences"
-}`,
-      },
-    ],
-    1000,
-    isStrategy
-  )
+  const result = await compileAndScore(strategy, market, timeframe, regime)
+  return result?.strategy ?? null
 }
 
 export async function scoreStrategy(
@@ -133,41 +232,30 @@ export async function scoreStrategy(
   market: string,
   timeframe: string
 ): Promise<Risk | null> {
-  return callQwen(
+  const parsed = await callQwen(
     [
       {
         role: 'system',
-        content: `You are MÓOU's risk assessment engine. Score trading strategies honestly across 5 dimensions. Be calibrated — most retail strategies score 40–75 overall. Never give perfect scores. Strategies without stop losses score higher on drawdown risk. Scalp strategies score higher on execution complexity. Output ONLY valid JSON. No markdown. No preamble.`,
+        content:
+          'You are MÓOU risk scorer. Output JSON only. Be calibrated. No markdown.',
       },
       {
         role: 'user',
-        content: `Score the risk of this strategy:
+        content: `Score this strategy.
 
 Name: ${strategy.strategy_name}
 Entry: ${strategy.entry_conditions}
 Exit: ${strategy.exit_conditions}
-Position Sizing: ${strategy.position_sizing}
+Sizing: ${strategy.position_sizing}
 Market: ${market}
 Timeframe: ${timeframe}
 
-Output ONLY this exact JSON:
-{
-  "overall_score": <0-100>,
-  "verdict": "CONSERVATIVE | MODERATE | AGGRESSIVE | EXTREME",
-  "volatility_exposure": <0-100>,
-  "volatility_note": "one plain English sentence",
-  "drawdown_risk": <0-100>,
-  "drawdown_note": "one plain English sentence",
-  "leverage_sensitivity": <0-100>,
-  "leverage_note": "one plain English sentence",
-  "regime_dependency": <0-100>,
-  "regime_note": "one plain English sentence",
-  "execution_complexity": <0-100>,
-  "execution_note": "one plain English sentence"
-}`,
+Return JSON: overall_score, verdict, volatility_exposure, volatility_note, drawdown_risk, drawdown_note, leverage_sensitivity, leverage_note, regime_dependency, regime_note, execution_complexity, execution_note. All score fields must be integers from 0 to 100.`,
       },
     ],
-    800,
-    isRisk
+    550
   )
+
+  if (!parsed) return null
+  return normalizeRisk(parsed)
 }
