@@ -375,6 +375,9 @@ export default function DocsPage() {
             <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', marginBottom: '8px' }}>
               Compile a plain-English trading strategy into a structured spec with risk scoring.
             </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontWeight: 400, color: 'var(--ink-secondary)', marginBottom: '16px' }}>
+              Typical latency: 15–30 seconds.
+            </p>
 
             <SectionLabel>Request Body</SectionLabel>
             <pre style={codeBlockStyle}>{`{

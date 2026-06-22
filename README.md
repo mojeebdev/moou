@@ -70,7 +70,7 @@ Rate cap:  30 POST requests per IP per hour (/compile and /score)
 | `GET` | `/markets` | Supported markets, timeframes, regimes |
 | `GET` | `/stats` | Total public API compilations |
 | `GET` | `/openapi` | OpenAPI 3.1 machine-readable spec |
-| `POST` | `/compile` | Compile + risk score (single call) |
+| `POST` | `/compile` | Compile + risk score (single call; typical latency 15–30s) |
 | `POST` | `/score` | Risk score for existing strategy spec |
 | `POST` | `/deploy-prompt` | getagent + GetAgent Studio deploy prompts (`prompt`, `studio_prompt`) |
 

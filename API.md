@@ -384,7 +384,7 @@ Content-Type: application/json
 }
 ```
 
-**Typical latency:** 1–5 seconds (two sequential Qwen calls: compile + score).
+**Typical latency:** 15–30 seconds (two sequential Qwen calls: compile + score).
 
 ---
 
